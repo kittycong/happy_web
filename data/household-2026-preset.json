@@ -1,0 +1,51 @@
+{
+  "source": "Google Drive - 가계부_2026.xlsx",
+  "createdAt": "2026-06-15",
+  "analysisModes": [
+    {
+      "id": "recentStable",
+      "label": "최근 안정 구간",
+      "description": "5월 이후 반복 지출이 안정된 항목을 중심으로 계산합니다."
+    },
+    {
+      "id": "annualAverage",
+      "label": "연간 평균",
+      "description": "월별 변동이 큰 공과금과 생활비를 연간 합계 기준으로 나눕니다."
+    }
+  ],
+  "monthlyPreset": {
+    "insurance": 146297,
+    "telecom": 11100,
+    "transit": 30000,
+    "utilities": 106000,
+    "subscription": 5200,
+    "grocery": 37369,
+    "dining": 164082,
+    "medical": 9875,
+    "others": 0
+  },
+  "excludedFromBenefitCalc": [
+    {
+      "category": "cardBill",
+      "label": "카드 대금",
+      "reason": "청구액은 이미 발생한 소비의 결제 결과이므로 혜택 대상 소비로 중복 계산하지 않습니다."
+    },
+    {
+      "category": "loanInterest",
+      "label": "대출 이자/원금",
+      "reason": "대부분 카드 결제 및 카드 실적 대상이 아니므로 현금/이체 지출로 분리합니다."
+    },
+    {
+      "category": "installmentRepayment",
+      "label": "기존 할부 상환",
+      "reason": "신규 카드 추천에서는 과거 소비 상환으로 표시하고 월 혜택 계산에서 제외할 수 있어야 합니다."
+    }
+  ],
+  "recurringPayments": [
+    { "name": "보험료", "currentCard": "삼성카드", "monthlyAmount": 146297, "targetInput": "insuranceDetail" },
+    { "name": "인터넷", "currentCard": "삼성카드", "monthlyAmount": 11000, "targetInput": "telecomDetail" },
+    { "name": "교통 충전", "currentCard": "현대카드", "monthlyAmount": 30000, "targetInput": "transit" },
+    { "name": "가스", "currentCard": "삼성카드", "monthlyAmount": 65472, "targetInput": "utilities" },
+    { "name": "전기", "currentCard": "삼성카드", "monthlyAmount": 57174, "targetInput": "utilities" }
+  ]
+}
