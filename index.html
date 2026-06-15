@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>내 카드 실질혜택 계산기 - 월 지출 기준 카드 추천</title>
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,18 +14,24 @@
         }
 
         :root {
-            --primary: #5B6DCD;
+            --primary: #6366F1;
+            --primary-hover: #4F46E5;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
-            --light: #F3F4F6;
-            --dark: #1F2937;
-            --border: #E5E7EB;
+            --light: #F6F3ED;
+            --dark: #0A0A0A;
+            --muted: #6B6B6B;
+            --border: #E8E2D8;
+            --background: #FBF8F1;
+            --surface: #FFFFFF;
+            --surface-soft: #FFFDF8;
+            --ivory: #F7F0E5;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #FFFFFF;
+            font-family: 'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background);
             min-height: 100vh;
             padding: 20px;
             color: var(--dark);
@@ -35,23 +43,26 @@
         }
 
         header {
-            background: white;
+            background: var(--surface);
             padding: 30px;
             border-radius: 12px;
             margin-bottom: 20px;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+            box-shadow: none;
         }
 
         h1 {
-            font-size: 28px;
+            font-family: 'General Sans', 'DM Sans', sans-serif;
+            font-size: 32px;
+            line-height: 1.08;
             margin-bottom: 10px;
-            color: var(--primary);
+            color: var(--dark);
+            font-weight: 700;
         }
 
         .subtitle {
-            color: #6B7280;
-            font-size: 14px;
+            color: var(--muted);
+            font-size: 15px;
         }
 
         .tabs {
@@ -66,10 +77,11 @@
             border: none;
             background: none;
             cursor: pointer;
-            font-weight: 500;
-            color: #6B7280;
+            font-weight: 600;
+            color: var(--muted);
             border-bottom: 3px solid transparent;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            border-radius: 6px 6px 0 0;
         }
 
         .tab.active {
@@ -79,12 +91,12 @@
 
         .tab-content {
             display: none;
-            background: white;
+            background: var(--surface);
             padding: 30px;
             border-radius: 12px;
             margin-bottom: 20px;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+            box-shadow: none;
         }
 
         .tab-content.active {
@@ -102,12 +114,12 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
-            background: #FAFAFB;
+            background: var(--surface-soft);
         }
 
         .category-builder-header {
             padding: 18px 20px;
-            background: #F8FAFC;
+            background: var(--surface-soft);
             border-bottom: 1px solid var(--border);
         }
 
@@ -126,7 +138,7 @@
             padding: 18px;
             border-right: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
-            background: white;
+            background: var(--surface);
         }
 
         .category-panel h4 {
@@ -135,7 +147,7 @@
         }
 
         .category-panel p {
-            color: #6B7280;
+            color: var(--muted);
             font-size: 12px;
             line-height: 1.45;
             margin-bottom: 12px;
@@ -160,8 +172,8 @@
         }
 
         .merchant-row input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             accent-color: var(--primary);
         }
 
@@ -173,15 +185,15 @@
         .merchant-card-select,
         .payment-select {
             padding: 8px 10px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
             font-size: 12px;
         }
 
         .merchant-switch-note {
             grid-column: 1 / -1;
-            color: #6B7280;
+            color: var(--muted);
             font-size: 12px;
             line-height: 1.4;
             padding-left: 24px;
@@ -212,9 +224,9 @@
         .custom-merchant-form select {
             width: 100%;
             padding: 10px 12px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
             font-size: 13px;
         }
 
@@ -250,7 +262,7 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 16px;
-            background: #FAFAFB;
+            background: var(--surface-soft);
         }
 
         .final-panel h3 {
@@ -270,17 +282,22 @@
             color: var(--dark);
         }
 
-        input[type="number"] {
+        input[type="number"],
+        input[type="text"] {
             padding: 10px 12px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
             font-size: 14px;
-            transition: border-color 0.3s;
+            background: var(--surface);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        input[type="number"]:focus {
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
         }
 
         .button-group {
@@ -293,10 +310,10 @@
         button {
             padding: 10px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
         .btn-primary {
@@ -305,18 +322,20 @@
         }
 
         .btn-primary:hover {
-            background: #4C5CBE;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(91, 109, 205, 0.3);
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.28);
         }
 
         .btn-secondary {
-            background: var(--light);
+            background: transparent;
             color: var(--dark);
+            border: 1px solid var(--border);
         }
 
         .btn-secondary:hover {
-            background: #E5E7EB;
+            background: var(--ivory);
+            transform: translateY(-1px);
         }
 
         .card-grid {
@@ -327,22 +346,23 @@
         }
 
         .card-item {
-            background: white;
-            border: 2px solid var(--border);
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
-            transition: all 0.3s;
+            transition: all 0.2s;
             position: relative;
         }
 
         .card-item:hover {
             border-color: var(--primary);
-            box-shadow: 0 8px 16px rgba(91, 109, 205, 0.15);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
         }
 
         .card-item.top {
             border-color: var(--success);
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, white 100%);
+            background: var(--surface);
         }
 
         .card-rank {
@@ -370,7 +390,7 @@
 
         .card-company {
             font-size: 12px;
-            color: #6B7280;
+            color: var(--muted);
             margin-bottom: 15px;
         }
 
@@ -387,7 +407,7 @@
         }
 
         .stat-label {
-            color: #6B7280;
+            color: var(--muted);
         }
 
         .stat-value {
@@ -448,7 +468,7 @@
         }
 
         .summary-box {
-            background: #FFFFFF;
+            background: var(--surface);
             color: var(--dark);
             border: 1px solid var(--border);
             padding: 20px;
@@ -487,12 +507,12 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 14px;
-            background: #FAFAFB;
+            background: var(--surface-soft);
         }
 
         .insight-label {
             display: block;
-            color: #6B7280;
+            color: var(--muted);
             font-size: 12px;
             margin-bottom: 6px;
         }
@@ -505,7 +525,7 @@
         }
 
         .breakdown {
-            background: #F9FAFB;
+            background: var(--surface-soft);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 12px;
@@ -524,7 +544,7 @@
             justify-content: space-between;
             gap: 10px;
             padding: 5px 0;
-            color: #4B5563;
+            color: var(--muted);
             font-size: 13px;
         }
 
@@ -533,7 +553,7 @@
         }
 
         .eligibility-box {
-            background: #F8FAFC;
+            background: var(--surface-soft);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 12px;
@@ -549,7 +569,7 @@
 
         .source-note {
             display: block;
-            color: #6B7280;
+            color: var(--muted);
             font-size: 12px;
             line-height: 1.45;
             margin-top: 6px;
@@ -559,7 +579,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: #EEF2FF;
+            background: rgba(99, 102, 241, 0.1);
             color: var(--primary);
             border-radius: 999px;
             padding: 4px 8px;
@@ -575,7 +595,7 @@
         }
 
         .comparison-table th {
-            background: var(--light);
+            background: var(--ivory);
             padding: 12px;
             text-align: left;
             font-weight: 600;
@@ -588,7 +608,7 @@
         }
 
         .comparison-table tr:hover {
-            background: #FAFAFA;
+            background: var(--surface-soft);
         }
 
         .badge {
@@ -640,7 +660,7 @@
         }
 
         .mini-chart {
-            background: white;
+            background: var(--surface);
             padding: 20px;
             border-radius: 12px;
             border: 1px solid var(--border);
@@ -662,7 +682,7 @@
         .bar-label {
             width: 80px;
             font-size: 13px;
-            color: #6B7280;
+            color: var(--muted);
             white-space: nowrap;
         }
 
@@ -677,7 +697,7 @@
 
         .bar-value {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary), #764ba2);
+            background: var(--primary);
             display: flex;
             align-items: center;
             justify-content: flex-end;
@@ -690,7 +710,7 @@
         .import-panel {
             border: 1px solid var(--border);
             border-radius: 12px;
-            background: #F8FAFC;
+            background: var(--surface-soft);
             padding: 18px;
             margin-bottom: 24px;
         }
@@ -711,15 +731,15 @@
         .import-control input,
         .import-control select {
             padding: 10px 12px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
             font-size: 13px;
         }
 
         .import-status {
             margin-top: 12px;
-            color: #4B5563;
+            color: var(--muted);
             font-size: 13px;
             line-height: 1.5;
         }
@@ -729,13 +749,13 @@
             margin-top: 16px;
             border: 1px solid var(--border);
             border-radius: 10px;
-            background: white;
+            background: var(--surface);
             overflow: hidden;
         }
 
         .review-panel-header {
             padding: 14px 16px;
-            background: #F8FAFC;
+            background: var(--surface-soft);
             border-bottom: 1px solid var(--border);
         }
 
@@ -759,14 +779,14 @@
             min-width: 120px;
             padding: 8px 10px;
             border: 1px solid var(--border);
-            border-radius: 8px;
-            background: white;
+            border-radius: 6px;
+            background: var(--surface);
         }
 
         .export-panel {
             border: 1px solid var(--border);
             border-radius: 12px;
-            background: #FAFAFB;
+            background: var(--surface-soft);
             padding: 18px;
             margin-bottom: 18px;
         }
@@ -782,13 +802,13 @@
             width: 100%;
             min-height: 420px;
             padding: 14px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-family: Consolas, 'Courier New', monospace;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
             font-size: 13px;
             line-height: 1.55;
             resize: vertical;
-            background: white;
+            background: var(--surface);
         }
 
         .table-wrap {
