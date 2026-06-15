@@ -647,7 +647,96 @@
             font-weight: 600;
         }
 
+        .import-panel {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #F8FAFC;
+            padding: 18px;
+            margin-bottom: 24px;
+        }
+
+        .import-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            align-items: end;
+        }
+
+        .import-control {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .import-control input,
+        .import-control select {
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            font-size: 13px;
+        }
+
+        .import-status {
+            margin-top: 12px;
+            color: #4B5563;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            header,
+            .tab-content {
+                padding: 18px;
+                border-radius: 10px;
+            }
+
+            .input-section,
+            .category-grid,
+            .final-grid,
+            .import-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .input-section {
+                gap: 12px;
+            }
+
+            .category-panel {
+                border-right: none;
+            }
+
+            .merchant-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                padding: 12px 0;
+            }
+
+            .merchant-row input[type="number"],
+            .merchant-card-select,
+            .payment-select {
+                width: 100%;
+                min-height: 40px;
+            }
+
+            .merchant-switch-note {
+                padding-left: 0;
+            }
+
+            .comparison-table {
+                min-width: 980px;
+                font-size: 13px;
+            }
+
             .card-grid {
                 grid-template-columns: 1fr;
             }
@@ -695,6 +784,8 @@
             border-radius: 4px;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -716,6 +807,43 @@
         <div class="tab-content active">
             <h2>당신의 월 지출을 입력하세요</h2>
             <p style="color: #6B7280; margin-bottom: 20px;">정확한 분석을 위해 각 카테고리의 월 평균 지출액을 입력해주세요. 내용이 저장됩니다.</p>
+
+            <div class="import-panel">
+                <div class="category-builder-header" style="padding: 0; border: none; background: transparent; margin-bottom: 14px;">
+                    <h3>3개월 카드 사용내역 자동 반영</h3>
+                    <p style="color: #6B7280; font-size: 13px;">엑셀 사용내역 또는 카드 명세서 사진을 올리면 가맹점/금액을 읽어 월평균 지출로 자동 분류합니다.</p>
+                </div>
+                <div class="import-grid">
+                    <div class="import-control">
+                        <label>엑셀 파일 (.xlsx/.xls/.csv)</label>
+                        <input type="file" id="excelImport" accept=".xlsx,.xls,.csv">
+                    </div>
+                    <div class="import-control">
+                        <label>명세서/영수증 사진</label>
+                        <input type="file" id="imageImport" accept="image/*" multiple>
+                    </div>
+                    <div class="import-control">
+                        <label>자료 기간</label>
+                        <select id="importMonths">
+                            <option value="3" selected>3개월치 월평균</option>
+                            <option value="2">2개월치 월평균</option>
+                            <option value="1">1개월치 그대로</option>
+                        </select>
+                    </div>
+                    <div class="import-control">
+                        <label>반영 방식</label>
+                        <select id="importMode">
+                            <option value="replace" selected>기존 지출 대체</option>
+                            <option value="add">현재 입력값에 더하기</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="button-group" style="margin-top: 14px;">
+                    <button class="btn-secondary" onclick="clearImportedSpending()">가져오기 초기화</button>
+                    <button class="btn-primary" onclick="importUsageFiles()">사용내역 자동 반영</button>
+                </div>
+                <div id="importStatus" class="import-status">지원 컬럼 예시: 이용일, 가맹점명, 이용금액, 승인금액, 결제금액. 사진은 OCR 품질에 따라 확인이 필요합니다.</div>
+            </div>
 
             <div class="input-section">
                 <div class="input-group">
@@ -902,25 +1030,27 @@
             <h2>내 기준 카드별 실질 혜택 비교</h2>
             <p style="color: #6B7280; margin-bottom: 20px;">입력한 월 지출을 기준으로 받을 수 있는 월 할인, 가입혜택, 연회비 차감을 비교합니다.</p>
 
-            <table class="comparison-table">
-                <thead>
-                    <tr>
-                        <th>순위</th>
-                        <th>카드명</th>
-                        <th>추천 혜택팩</th>
-                        <th>월 순혜택</th>
-                        <th>실질 월 할인율</th>
-                        <th>첫해 순혜택</th>
-                        <th>실적 인정액</th>
-                        <th>실적 미포함</th>
-                        <th>연회비</th>
-                        <th>월 할인</th>
-                        <th>가입혜택</th>
-                        <th>주요 적용처</th>
-                    </tr>
-                </thead>
-                <tbody id="comparisonTable"></tbody>
-            </table>
+            <div class="table-wrap">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>순위</th>
+                            <th>카드명</th>
+                            <th>추천 혜택팩</th>
+                            <th>월 순혜택</th>
+                            <th>실질 월 할인율</th>
+                            <th>첫해 순혜택</th>
+                            <th>실적 인정액</th>
+                            <th>실적 미포함</th>
+                            <th>연회비</th>
+                            <th>월 할인</th>
+                            <th>가입혜택</th>
+                            <th>주요 적용처</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparisonTable"></tbody>
+                </table>
+            </div>
         </div>
 
         <!-- TAB 4: 함정 체크 -->
@@ -1569,6 +1699,211 @@
                     input.value = value;
                 }
             });
+        }
+
+        function setImportStatus(message) {
+            const el = document.getElementById('importStatus');
+            if (el) el.textContent = message;
+        }
+
+        function parseMoney(value) {
+            if (typeof value === 'number') return Math.abs(value);
+            if (!value) return 0;
+            const normalized = String(value).replace(/[^\d.-]/g, '');
+            const parsed = parseFloat(normalized);
+            return Number.isFinite(parsed) ? Math.abs(parsed) : 0;
+        }
+
+        function findColumn(row, patterns) {
+            const keys = Object.keys(row);
+            for (const pattern of patterns) {
+                const found = keys.find(key => String(key).toLowerCase().includes(pattern));
+                if (found) return found;
+            }
+            return undefined;
+        }
+
+        function classifyMerchant(text) {
+            const name = String(text || '').toLowerCase().replace(/\s+/g, '');
+            const rules = [
+                { match: ["네이버", "naver"], target: "naverShopping", check: "chkNaver" },
+                { match: ["쿠팡이츠", "coupangeats"], target: "coupangEatsSpend", check: "chkCoupangEats" },
+                { match: ["쿠팡", "coupang"], target: "coupangShopping", check: "chkCoupang" },
+                { match: ["무신사"], target: "musinsaShopping", check: "chkMusinsa" },
+                { match: ["지그재그"], target: "zigzagShopping", check: "chkZigzag" },
+                { match: ["29cm"], target: "cm29Shopping", check: "chk29cm" },
+                { match: ["w컨셉", "wconcept"], target: "wconceptShopping", check: "chkWconcept" },
+                { match: ["오늘의집"], target: "todayHouseShopping", check: "chkTodayHouse" },
+                { match: ["마켓컬리", "컬리"], target: "marketKurly", check: "chkMarketKurly" },
+                { match: ["오아시스"], target: "oasisMarket", check: "chkOasis" },
+                { match: ["이마트"], target: "emartSpend", check: "chkEmart" },
+                { match: ["트레이더스"], target: "tradersSpend", check: "chkTraders" },
+                { match: ["롯데마트"], target: "lotteMartSpend", check: "chkLotteMart" },
+                { match: ["배달의민족", "배민"], target: "baeminSpend", check: "chkBaemin" },
+                { match: ["스타벅스", "투썸", "이디야", "메가커피", "컴포즈", "커피빈", "카페"], target: "cafeDetail", check: "chkCafe" },
+                { match: ["gs25", "지에스25"], target: "gs25Spend", check: "chkGs25" },
+                { match: ["cu", "씨유"], target: "cuSpend", check: "chkCu" },
+                { match: ["택시", "카카오t", "카카오택시"], target: "taxiDetail", check: "chkTaxi" },
+                { match: ["cgv", "메가박스", "롯데시네마", "영화"], target: "movieSpend", check: "chkMovie" },
+                { match: ["skt", "kt", "lgu", "lg유플러스", "통신"], target: "telecomDetail", check: "chkTelecom" },
+                { match: ["보험", "손해", "생명"], target: "insuranceDetail", check: "chkInsurance" },
+                { match: ["주유", "sk에너지", "gs칼텍스", "s-oil", "현대오일", "충전소"], top: "fuel" },
+                { match: ["병원", "약국", "의원"], top: "medical" },
+                { match: ["학원", "교육"], top: "education" },
+                { match: ["미용", "헬스", "스포츠", "피트니스"], top: "beautySports" },
+                { match: ["음식", "식당", "레스토랑", "분식", "치킨", "피자", "고기", "한식", "중식", "일식"], target: "diningDetail", check: "chkDining" },
+                { match: ["편의점"], target: "gs25Spend", check: "chkGs25" }
+            ];
+            return rules.find(rule => rule.match.some(keyword => name.includes(keyword))) || { top: "others" };
+        }
+
+        function addAmountToInput(inputId, amount, mode) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const current = mode === 'add' ? (parseInt(input.value) || 0) : 0;
+            input.value = Math.round(current + amount);
+        }
+
+        function applyImportedTotals(rows) {
+            const months = Math.max(parseInt(document.getElementById('importMonths')?.value) || 3, 1);
+            const mode = document.getElementById('importMode')?.value || 'replace';
+            const totals = {};
+            let importedTotal = 0;
+
+            rows.forEach(row => {
+                if (!row.amount) return;
+                const classified = classifyMerchant(row.merchant);
+                const key = classified.target || classified.top || "others";
+                totals[key] = (totals[key] || 0) + row.amount;
+                importedTotal += row.amount;
+            });
+
+            if (mode === 'replace') {
+                [...document.querySelectorAll('.merchant-row input[type="number"]'), ...document.querySelectorAll('.input-section input[type="number"]')]
+                    .forEach(input => input.value = 0);
+            }
+
+            Object.entries(totals).forEach(([key, total]) => {
+                const monthly = total / months;
+                const input = document.getElementById(key);
+                if (input && input.closest('.merchant-row')) {
+                    const row = input.closest('.merchant-row');
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = true;
+                }
+                addAmountToInput(key, monthly, mode);
+            });
+
+            syncTopInputsFromDetails();
+            saveExpenses();
+            setImportStatus(`${rows.length}건, 총 ${formatWon(importedTotal)}을 ${months}개월 월평균으로 반영했습니다. 분류되지 않은 항목은 기타에 들어갑니다.`);
+        }
+
+        async function parseExcelFile(file) {
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                return parseCsvText(await file.text());
+            }
+            if (!window.XLSX) throw new Error('엑셀 파서가 로드되지 않았습니다.');
+            const buffer = await file.arrayBuffer();
+            const workbook = XLSX.read(buffer, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+            return json.map(row => {
+                const amountKey = findColumn(row, ['이용금액', '승인금액', '결제금액', '매출금액', '사용금액', '금액']);
+                const merchantKey = findColumn(row, ['가맹', '사용처', '이용처', '상호', '내용', '적요', 'merchant']);
+                return {
+                    merchant: merchantKey ? row[merchantKey] : Object.values(row).join(' '),
+                    amount: amountKey ? parseMoney(row[amountKey]) : 0
+                };
+            }).filter(row => row.amount > 0);
+        }
+
+        function parseCsvLine(line) {
+            const cells = [];
+            let current = '';
+            let quoted = false;
+            for (const char of line) {
+                if (char === '"') {
+                    quoted = !quoted;
+                } else if (char === ',' && !quoted) {
+                    cells.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            cells.push(current.trim());
+            return cells;
+        }
+
+        function parseCsvText(text) {
+            const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter(line => line.trim());
+            if (lines.length < 2) return [];
+            const headers = parseCsvLine(lines[0]);
+            const amountIndex = headers.findIndex(header => /이용금액|승인금액|결제금액|매출금액|사용금액|금액/i.test(header));
+            const merchantIndex = headers.findIndex(header => /가맹|사용처|이용처|상호|내용|적요|merchant/i.test(header));
+            return lines.slice(1).map(line => {
+                const cells = parseCsvLine(line);
+                return {
+                    merchant: merchantIndex >= 0 ? cells[merchantIndex] : cells.join(' '),
+                    amount: amountIndex >= 0 ? parseMoney(cells[amountIndex]) : 0
+                };
+            }).filter(row => row.amount > 0);
+        }
+
+        function parseOcrText(text) {
+            return text.split(/\n+/).map(line => {
+                const amountMatch = line.match(/([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{4,})\s*원?/);
+                if (!amountMatch) return null;
+                return {
+                    merchant: line.replace(amountMatch[0], '').trim(),
+                    amount: parseMoney(amountMatch[1])
+                };
+            }).filter(Boolean);
+        }
+
+        async function parseImageFiles(files) {
+            if (!window.Tesseract) throw new Error('OCR 엔진이 로드되지 않았습니다.');
+            const rows = [];
+            for (const file of files) {
+                setImportStatus(`사진 OCR 처리 중: ${file.name}`);
+                const result = await Tesseract.recognize(file, 'kor+eng');
+                rows.push(...parseOcrText(result.data.text));
+            }
+            return rows;
+        }
+
+        async function importUsageFiles() {
+            try {
+                const excelFile = document.getElementById('excelImport')?.files?.[0];
+                const imageFiles = [...(document.getElementById('imageImport')?.files || [])];
+                const rows = [];
+
+                if (excelFile) {
+                    setImportStatus(`엑셀 읽는 중: ${excelFile.name}`);
+                    rows.push(...await parseExcelFile(excelFile));
+                }
+                if (imageFiles.length) {
+                    rows.push(...await parseImageFiles(imageFiles));
+                }
+                if (!rows.length) {
+                    setImportStatus('읽을 수 있는 사용내역이 없습니다. 엑셀 컬럼명이나 사진 선명도를 확인하세요.');
+                    return;
+                }
+
+                applyImportedTotals(rows);
+                if (lastAnalysisResults) analyzeCards();
+            } catch (error) {
+                setImportStatus(`가져오기 실패: ${error.message}`);
+            }
+        }
+
+        function clearImportedSpending() {
+            const excelInput = document.getElementById('excelImport');
+            const imageInput = document.getElementById('imageImport');
+            if (excelInput) excelInput.value = '';
+            if (imageInput) imageInput.value = '';
+            setImportStatus('가져오기 파일 선택을 초기화했습니다.');
         }
 
         function getRawExpenses() {
