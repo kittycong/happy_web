@@ -190,6 +190,43 @@
             font-weight: 700;
         }
 
+        .custom-merchant-form {
+            display: grid;
+            grid-template-columns: minmax(160px, 1fr) minmax(180px, 1.2fr) minmax(140px, 0.8fr) auto;
+            gap: 10px;
+            margin-top: 14px;
+            align-items: end;
+        }
+
+        .custom-merchant-form label {
+            display: block;
+            font-size: 12px;
+            color: #4B5563;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .custom-merchant-form input,
+        .custom-merchant-form select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            font-size: 13px;
+        }
+
+        .merchant-delete-btn {
+            border: none;
+            background: #FEE2E2;
+            color: #991B1B;
+            border-radius: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
         .input-meta {
             display: flex;
             align-items: center;
@@ -731,7 +768,8 @@
             .input-section,
             .category-grid,
             .final-grid,
-            .import-grid {
+            .import-grid,
+            .custom-merchant-form {
                 grid-template-columns: 1fr;
             }
 
@@ -973,9 +1011,41 @@
                 <div class="category-builder-header">
                     <h3>혜택 대상처 상세 입력</h3>
                     <p style="color: #6B7280; font-size: 13px;">체크한 대상처와 금액만 카드 혜택 계산에 우선 반영됩니다. 카드 상품설명서의 할인 대상처와 맞춰 입력하세요.</p>
+                    <div class="custom-merchant-form">
+                        <div>
+                            <label for="customMerchantCategory">혜택 분류</label>
+                            <select id="customMerchantCategory">
+                                <option value="onlineShopping">온라인쇼핑</option>
+                                <option value="grocery">마트/장보기</option>
+                                <option value="largeMart">대형마트</option>
+                                <option value="dining">외식/음식점</option>
+                                <option value="delivery">배달앱</option>
+                                <option value="cafe">카페</option>
+                                <option value="convenience">편의점</option>
+                                <option value="taxi">택시</option>
+                                <option value="entertainment">영화/문화</option>
+                                <option value="telecom">통신</option>
+                                <option value="insurance">보험</option>
+                                <option value="fuel">주유/충전</option>
+                                <option value="medical">의료</option>
+                                <option value="beautySports">미용/스포츠</option>
+                                <option value="education">학원/교육</option>
+                                <option value="others">기타</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="customMerchantName">지출처 이름</label>
+                            <input type="text" id="customMerchantName" placeholder="예: 올리브영, 컬리, 넷플릭스">
+                        </div>
+                        <div>
+                            <label for="customMerchantAmount">월평균 금액</label>
+                            <input type="number" id="customMerchantAmount" placeholder="50000">
+                        </div>
+                        <button class="btn-primary" onclick="addCustomMerchant()">지출처 추가</button>
+                    </div>
                 </div>
                 <div class="category-grid">
-                    <div class="category-panel">
+                    <div class="category-panel" data-custom-panel="online">
                         <h4>온라인쇼핑</h4>
                         <p>YOU Prime 온라인쇼핑, KB Pay 온라인몰 혜택 대상</p>
                         <div class="merchant-row"><label><input type="checkbox" id="chkNaver" checked> 네이버플러스스토어</label><input type="number" id="naverShopping" value="40000"></div>
@@ -987,7 +1057,7 @@
                         <div class="merchant-row"><label><input type="checkbox" id="chkTodayHouse" checked> 오늘의집</label><input type="number" id="todayHouseShopping" value="20000"></div>
                     </div>
 
-                    <div class="category-panel">
+                    <div class="category-panel" data-custom-panel="grocery">
                         <h4>마트/장보기</h4>
                         <p>온라인장보기, 대형마트, 가족팩 장보기 혜택 대상</p>
                         <div class="merchant-row"><label><input type="checkbox" id="chkMarketKurly" checked> 마켓컬리</label><input type="number" id="marketKurly" value="60000"></div>
@@ -997,7 +1067,7 @@
                         <div class="merchant-row"><label><input type="checkbox" id="chkLotteMart" checked> 롯데마트</label><input type="number" id="lotteMartSpend" value="30000"></div>
                     </div>
 
-                    <div class="category-panel">
+                    <div class="category-panel" data-custom-panel="food">
                         <h4>외식/배달/카페</h4>
                         <p>음식점, 편의점, 배달/커피, 카페 혜택 대상</p>
                         <div class="merchant-row"><label><input type="checkbox" id="chkDining" checked> 음식점/외식</label><input type="number" id="diningDetail" value="230000"></div>
@@ -1007,7 +1077,7 @@
                         <div class="merchant-row"><label><input type="checkbox" id="chkKidsCafe"> 키즈카페</label><input type="number" id="kidsCafeSpend" value="10000"></div>
                     </div>
 
-                    <div class="category-panel">
+                    <div class="category-panel" data-custom-panel="life">
                         <h4>편의점/교통/생활</h4>
                         <p>편의점, 택시, 영화, 통신, 보험, 생활요금 혜택 대상</p>
                         <div class="merchant-row"><label><input type="checkbox" id="chkGs25" checked> GS25</label><input type="number" id="gs25Spend" value="30000"></div>
@@ -1555,6 +1625,24 @@
             telecomDetail: "통신/보험/APP",
             insuranceDetail: "통신/보험/APP"
         };
+        const customMerchantConfig = {
+            onlineShopping: { panel: "online", raw: "온라인쇼핑", merchantCategory: "온라인쇼핑", label: "온라인쇼핑" },
+            grocery: { panel: "grocery", raw: "마트", merchantCategory: "온라인장보기", label: "마트/장보기" },
+            largeMart: { panel: "grocery", raw: "대형마트", merchantCategory: "대형마트", label: "대형마트" },
+            dining: { panel: "food", raw: "외식", merchantCategory: "음식점/편의점", label: "외식/음식점" },
+            delivery: { panel: "food", raw: "배달", merchantCategory: "배달", label: "배달앱" },
+            cafe: { panel: "food", raw: "카페", merchantCategory: "카페", label: "카페" },
+            convenience: { panel: "life", raw: "편의점", merchantCategory: "음식점/편의점", label: "편의점" },
+            taxi: { panel: "life", raw: "택시", merchantCategory: "택시/커피/영화", label: "택시" },
+            entertainment: { panel: "life", raw: "영화문화", merchantCategory: "택시/커피/영화", label: "영화/문화" },
+            telecom: { panel: "life", raw: "통신", merchantCategory: "통신/보험/APP", label: "통신" },
+            insurance: { panel: "life", raw: "보험", merchantCategory: "통신/보험/APP", label: "보험" },
+            fuel: { panel: "life", raw: "주유", merchantCategory: "주유", label: "주유/충전" },
+            medical: { panel: "life", raw: "의료", merchantCategory: "미용/스포츠/의료", label: "의료" },
+            beautySports: { panel: "life", raw: "미용스포츠", merchantCategory: "미용/스포츠/의료", label: "미용/스포츠" },
+            education: { panel: "life", raw: "교육", merchantCategory: "학원/교육", label: "학원/교육" },
+            others: { panel: "life", raw: "기타", merchantCategory: "기타", label: "기타" }
+        };
         const topPaymentDefaults = {
             housing: "transfer",
             utilities: "transfer",
@@ -1641,6 +1729,108 @@
             });
         }
 
+        function makeCustomMerchantId() {
+            return `custom_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        }
+
+        function getCustomMerchantDefinitions() {
+            return [...document.querySelectorAll('.merchant-row.custom-merchant')].map(row => {
+                const input = row.querySelector('input[type="number"]');
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                const select = row.querySelector('.merchant-card-select');
+                return {
+                    id: row.dataset.customId,
+                    name: row.dataset.name,
+                    topInput: row.dataset.topInput,
+                    amount: parseInt(input?.value) || 0,
+                    checked: checkbox?.checked !== false,
+                    currentCard: select?.value || '기존카드'
+                };
+            });
+        }
+
+        function saveCustomMerchants() {
+            localStorage.setItem('cardCustomMerchants', JSON.stringify(getCustomMerchantDefinitions()));
+        }
+
+        function createCustomMerchantRow(definition) {
+            const config = customMerchantConfig[definition.topInput] || customMerchantConfig.others;
+            const panel = document.querySelector(`[data-custom-panel="${config.panel}"]`);
+            if (!panel || !definition.name) return;
+
+            const id = definition.id || makeCustomMerchantId();
+            const checkId = `chk_${id}`;
+            const amountId = `amt_${id}`;
+            const row = document.createElement('div');
+            row.className = 'merchant-row custom-merchant';
+            row.dataset.customId = id;
+            row.dataset.name = definition.name;
+            row.dataset.topInput = definition.topInput || 'others';
+            row.dataset.rawCategory = config.raw;
+            row.innerHTML = `
+                <label><input type="checkbox" id="${checkId}" ${definition.checked === false ? '' : 'checked'}> ${definition.name}</label>
+                <input type="number" id="${amountId}" value="${parseInt(definition.amount) || 0}">
+                <button type="button" class="merchant-delete-btn" onclick="removeCustomMerchant('${id}')">삭제</button>
+            `;
+            panel.appendChild(row);
+            merchantCategoryByInput[amountId] = config.merchantCategory;
+            injectMerchantCardSelectors();
+            const select = document.getElementById(`${amountId}CurrentCard`);
+            if (select && definition.currentCard) select.value = definition.currentCard;
+            bindMerchantRow(row);
+        }
+
+        function loadCustomMerchants() {
+            const saved = localStorage.getItem('cardCustomMerchants');
+            if (!saved) return;
+            try {
+                JSON.parse(saved).forEach(createCustomMerchantRow);
+            } catch (error) {
+                console.warn('custom merchant load failed', error);
+            }
+        }
+
+        function addCustomMerchant() {
+            const category = document.getElementById('customMerchantCategory')?.value || 'others';
+            const nameInput = document.getElementById('customMerchantName');
+            const amountInput = document.getElementById('customMerchantAmount');
+            const name = nameInput?.value.trim();
+            const amount = parseInt(amountInput?.value) || 0;
+            if (!name) {
+                showMessage('추가할 지출처 이름을 입력하세요.', 'warning');
+                return;
+            }
+
+            createCustomMerchantRow({
+                id: makeCustomMerchantId(),
+                name,
+                topInput: category,
+                amount,
+                checked: true,
+                currentCard: '기존카드'
+            });
+            if (nameInput) nameInput.value = '';
+            if (amountInput) amountInput.value = '';
+            syncTopInputsFromDetails();
+            saveDetailedInputState();
+            saveCustomMerchants();
+            refreshNotionPreview();
+            if (lastAnalysisResults) analyzeCards();
+        }
+
+        function removeCustomMerchant(id) {
+            const row = document.querySelector(`.merchant-row.custom-merchant[data-custom-id="${id}"]`);
+            if (!row) return;
+            const amountId = row.querySelector('input[type="number"]')?.id;
+            if (amountId) delete merchantCategoryByInput[amountId];
+            row.remove();
+            syncTopInputsFromDetails();
+            saveDetailedInputState();
+            saveCustomMerchants();
+            refreshNotionPreview();
+            if (lastAnalysisResults) analyzeCards();
+        }
+
         function savePaymentState() {
             const state = {};
             document.querySelectorAll('.payment-select').forEach(select => {
@@ -1657,6 +1847,16 @@
                 const select = document.getElementById(id);
                 if (select) select.value = value;
             });
+        }
+
+        function getCustomTotalByRaw(rawCategory) {
+            return [...document.querySelectorAll('.merchant-row.custom-merchant')].reduce((sum, row) => {
+                if (row.dataset.rawCategory !== rawCategory) return sum;
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                const input = row.querySelector('input[type="number"]');
+                if (checkbox && !checkbox.checked) return sum;
+                return sum + (parseInt(input?.value) || 0);
+            }, 0);
         }
 
         function syncTopInputsFromDetails() {
@@ -1698,24 +1898,42 @@
                 entertainment: checkedAmount("chkMovie", "movieSpend")
             };
 
+            document.querySelectorAll('.merchant-row.custom-merchant').forEach(row => {
+                const topInput = row.dataset.topInput;
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                const input = row.querySelector('input[type="number"]');
+                if (!topInput || (checkbox && !checkbox.checked)) return;
+                sums[topInput] = (sums[topInput] || 0) + (parseInt(input?.value) || 0);
+            });
+
             Object.entries(sums).forEach(([id, amount]) => {
                 const input = document.getElementById(id);
                 if (input) input.value = amount;
             });
         }
 
-        function setupInputSync() {
-            document.querySelectorAll('.merchant-row input, .merchant-row select').forEach(input => {
+        function bindMerchantRow(row) {
+            row.querySelectorAll('input, select').forEach(input => {
+                if (input.dataset.syncBound) return;
+                input.dataset.syncBound = 'true';
                 input.addEventListener('input', () => {
                     syncTopInputsFromDetails();
                     saveDetailedInputState();
+                    saveCustomMerchants();
+                    refreshNotionPreview();
                 });
                 input.addEventListener('change', () => {
                     syncTopInputsFromDetails();
                     saveDetailedInputState();
+                    saveCustomMerchants();
                     refreshMerchantSwitchIndicators(lastBestCombo);
+                    refreshNotionPreview();
                 });
             });
+        }
+
+        function setupInputSync() {
+            document.querySelectorAll('.merchant-row').forEach(bindMerchantRow);
         }
 
         function checkedAmount(checkId, inputId) {
@@ -2050,7 +2268,7 @@
             return [...document.querySelectorAll('.input-section .input-group input[type="number"]')].map(input => {
                 const category = topInputCategoryMap[input.id] || getInputLabel(input).replace(/^[^\w가-힣]+/, '').trim();
                 const amount = parseInt(input.value) || 0;
-                const paymentSelect = document.getElementById(`${input.id}Payment`);
+                const paymentSelect = document.getElementById(`${input.id}PayMethod`);
                 return {
                     대분류: category,
                     입력ID: input.id,
@@ -2207,25 +2425,25 @@
             return {
                 "주거": parseInt(document.getElementById('housing').value) || 0,
                 "공과금": parseInt(document.getElementById('utilities').value) || 0,
-                "통신": checkedAmount("chkTelecom", "telecomDetail"),
-                "보험": checkedAmount("chkInsurance", "insuranceDetail"),
+                "통신": checkedAmount("chkTelecom", "telecomDetail") + getCustomTotalByRaw("통신"),
+                "보험": checkedAmount("chkInsurance", "insuranceDetail") + getCustomTotalByRaw("보험"),
                 "구독": parseInt(document.getElementById('subscription').value) || 0,
                 "대중교통": parseInt(document.getElementById('transit').value) || 0,
-                "택시": checkedAmount("chkTaxi", "taxiDetail"),
+                "택시": checkedAmount("chkTaxi", "taxiDetail") + getCustomTotalByRaw("택시"),
                 "주유": parseInt(document.getElementById('fuel').value) || 0,
                 "마트": checkedTotal([
                     ["chkMarketKurly", "marketKurly"],
                     ["chkOasis", "oasisMarket"]
-                ]),
-                "외식": checkedAmount("chkDining", "diningDetail"),
+                ]) + getCustomTotalByRaw("마트"),
+                "외식": checkedAmount("chkDining", "diningDetail") + getCustomTotalByRaw("외식"),
                 "배달": checkedTotal([
                     ["chkBaemin", "baeminSpend"],
                     ["chkCoupangEats", "coupangEatsSpend"]
-                ]),
+                ]) + getCustomTotalByRaw("배달"),
                 "카페": checkedTotal([
                     ["chkCafe", "cafeDetail"],
                     ["chkKidsCafe", "kidsCafeSpend"]
-                ]),
+                ]) + getCustomTotalByRaw("카페"),
                 "온라인쇼핑": checkedTotal([
                     ["chkNaver", "naverShopping"],
                     ["chkCoupang", "coupangShopping"],
@@ -2234,20 +2452,20 @@
                     ["chk29cm", "cm29Shopping"],
                     ["chkWconcept", "wconceptShopping"],
                     ["chkTodayHouse", "todayHouseShopping"]
-                ]),
+                ]) + getCustomTotalByRaw("온라인쇼핑"),
                 "편의점": checkedTotal([
                     ["chkGs25", "gs25Spend"],
                     ["chkCu", "cuSpend"]
-                ]),
+                ]) + getCustomTotalByRaw("편의점"),
                 "대형마트": checkedTotal([
                     ["chkEmart", "emartSpend"],
                     ["chkTraders", "tradersSpend"],
                     ["chkLotteMart", "lotteMartSpend"]
-                ]),
+                ]) + getCustomTotalByRaw("대형마트"),
                 "의료": parseInt(document.getElementById('medical').value) || 0,
                 "미용스포츠": parseInt(document.getElementById('beautySports').value) || 0,
                 "교육": parseInt(document.getElementById('education').value) || 0,
-                "영화문화": checkedAmount("chkMovie", "movieSpend"),
+                "영화문화": checkedAmount("chkMovie", "movieSpend") + getCustomTotalByRaw("영화문화"),
                 "기타": parseInt(document.getElementById('others').value) || 0
             };
         }
@@ -2304,6 +2522,7 @@
             localStorage.setItem('cardExpenses', JSON.stringify(expenses));
             saveDetailedInputState();
             savePaymentState();
+            saveCustomMerchants();
         }
 
         // 저장된 지출 불러오기
@@ -3084,6 +3303,7 @@
             localStorage.removeItem('cardExpenses');
             localStorage.removeItem('cardDetailedInputs');
             localStorage.removeItem('cardPaymentMethods');
+            localStorage.removeItem('cardCustomMerchants');
             location.reload();
         }
 
@@ -3108,6 +3328,7 @@
         // 페이지 로드 시
         window.addEventListener('load', () => {
             injectPaymentSelectors();
+            loadCustomMerchants();
             injectMerchantCardSelectors();
             loadPaymentState();
             loadExpenses();
