@@ -656,6 +656,7 @@
                 <button class="tab" onclick="switchTab(1)">📈 분석 결과</button>
                 <button class="tab" onclick="switchTab(2)">💡 혜택 비교</button>
                 <button class="tab" onclick="switchTab(3)">⚠️ 함정 체크</button>
+                <button class="tab" onclick="switchTab(4)">🔗 조합 최적화</button>
             </div>
         </header>
 
@@ -872,6 +873,17 @@
             <p style="color: #6B7280; margin-bottom: 20px;">각 카드 발급 전 반드시 확인해야 할 사항들입니다. 카드사 상품설명서에서 최종 확인하세요.</p>
 
             <div id="trapChecklist"></div>
+        </div>
+
+        <!-- TAB 4: 조합 최적화 -->
+        <div class="tab-content">
+            <h2>카드 조합 최적화</h2>
+            <p style="color: #6B7280; margin-bottom: 20px;">2장 조합 기준으로 겹치는 혜택은 중복 계산하지 않고, 카테고리별 유리한 카드에 지출을 배분한 예상 순혜택입니다.</p>
+            <div id="comboResults" class="card-grid"></div>
+            <div id="emptyCombo" class="empty-state">
+                <div class="empty-state-icon">🔗</div>
+                <p>지출을 입력하고 분석을 실행하면 조합 추천이 표시됩니다.</p>
+            </div>
         </div>
     </div>
 
@@ -1794,6 +1806,7 @@
 
             // 비교 테이블 업데이트
             updateComparisonTable();
+            updateComboOptimizer(results, totalSpending);
 
             // 함정 체크리스트 업데이트
             updateTrapChecklist(results[0]);
@@ -1842,6 +1855,83 @@
                 `;
                 table.innerHTML += row;
             });
+        }
+
+        function updateComboOptimizer(results, totalSpending) {
+            const comboResults = document.getElementById('comboResults');
+            const emptyCombo = document.getElementById('emptyCombo');
+            if (!comboResults || !emptyCombo) return;
+
+            const combos = [];
+            for (let i = 0; i < results.length; i++) {
+                for (let j = i + 1; j < results.length; j++) {
+                    const cards = [results[i], results[j]];
+                    const bestByArea = new Map();
+
+                    cards.forEach(card => {
+                        card.analysis.categoryDetails.forEach(detail => {
+                            const key = detail.category;
+                            const current = bestByArea.get(key);
+                            if (!current || detail.benefit > current.benefit) {
+                                bestByArea.set(key, {
+                                    area: key,
+                                    benefit: detail.benefit,
+                                    cardName: card.name
+                                });
+                            }
+                        });
+                    });
+
+                    const monthlyDiscount = [...bestByArea.values()].reduce((sum, item) => sum + item.benefit, 0);
+                    const eventMonthlyValue = cards.reduce((sum, card) => sum + card.analysis.eventMonthlyValue, 0);
+                    const annualFeeMonthly = cards.reduce((sum, card) => sum + card.analysis.monthlyAnnualFee, 0);
+                    const netMonthlyBenefit = monthlyDiscount + eventMonthlyValue - annualFeeMonthly;
+                    const firstYearNetBenefit = (monthlyDiscount * 12) + cards.reduce((sum, card) => sum + card.analysis.eventValue, 0) - cards.reduce((sum, card) => sum + card.analysis.effectiveAnnualFee, 0);
+
+                    combos.push({
+                        cards,
+                        bestAreas: [...bestByArea.values()].sort((a, b) => b.benefit - a.benefit),
+                        monthlyDiscount,
+                        eventMonthlyValue,
+                        annualFeeMonthly,
+                        netMonthlyBenefit,
+                        firstYearNetBenefit,
+                        effectiveRate: totalSpending > 0 ? netMonthlyBenefit / totalSpending : 0
+                    });
+                }
+            }
+
+            const topCombos = combos.sort((a, b) => b.firstYearNetBenefit - a.firstYearNetBenefit).slice(0, 6);
+            comboResults.innerHTML = topCombos.map((combo, index) => {
+                const areaText = combo.bestAreas.slice(0, 5).map(item => `${item.area}: ${item.cardName} ${formatWon(item.benefit)}`).join(' · ') || '적용 없음';
+                return `
+                    <div class="card-item ${index === 0 ? 'top' : ''}">
+                        <div class="card-rank">${index + 1}</div>
+                        <div class="card-name">${combo.cards.map(card => card.name).join(' + ')}</div>
+                        <div class="card-company">${combo.cards.map(card => card.company).join(' · ')}</div>
+                        <div class="card-stat">
+                            <span class="stat-label">조합 월 순혜택</span>
+                            <span class="stat-value ${combo.netMonthlyBenefit >= 0 ? 'benefit' : 'danger'}">${formatSignedWon(combo.netMonthlyBenefit)}</span>
+                        </div>
+                        <div class="card-stat">
+                            <span class="stat-label">조합 실질 할인율</span>
+                            <span class="stat-value ${combo.effectiveRate >= 0.03 ? 'benefit' : ''}">${formatRate(combo.effectiveRate)}</span>
+                        </div>
+                        <div class="card-stat">
+                            <span class="stat-label">첫해 조합 순혜택</span>
+                            <span class="stat-value ${combo.firstYearNetBenefit >= 0 ? 'benefit' : 'danger'}">${formatSignedWon(combo.firstYearNetBenefit)}</span>
+                        </div>
+                        <div class="breakdown">
+                            <div class="breakdown-title">배분 기준</div>
+                            <div class="breakdown-row"><span>월 할인 합계</span><strong>${formatWon(combo.monthlyDiscount)}</strong></div>
+                            <div class="breakdown-row"><span>가입혜택 월 환산</span><strong>${formatWon(combo.eventMonthlyValue)}</strong></div>
+                            <div class="breakdown-row"><span>연회비 월 차감</span><strong>-${formatWon(combo.annualFeeMonthly)}</strong></div>
+                            <span class="source-note">${areaText}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            emptyCombo.style.display = topCombos.length ? 'none' : 'block';
         }
 
         // 차트 업데이트
