@@ -684,6 +684,34 @@
             line-height: 1.5;
         }
 
+        .export-panel {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #FAFAFB;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .export-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .notion-preview {
+            width: 100%;
+            min-height: 420px;
+            padding: 14px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.55;
+            resize: vertical;
+            background: white;
+        }
+
         .table-wrap {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -753,6 +781,13 @@
                 font-size: 13px;
                 padding: 10px 15px;
             }
+
+            .export-actions .btn-primary,
+            .export-actions .btn-secondary,
+            .button-group .btn-primary,
+            .button-group .btn-secondary {
+                width: 100%;
+            }
         }
 
         .empty-state {
@@ -800,6 +835,7 @@
                 <button class="tab" onclick="switchTab(3)">⚠️ 함정 체크</button>
                 <button class="tab" onclick="switchTab(4)">🔗 조합 최적화</button>
                 <button class="tab" onclick="switchTab(5)">✅ 최종 정리</button>
+                <button class="tab" onclick="switchTab(6)">📝 노션 보기</button>
             </div>
         </header>
 
@@ -841,6 +877,11 @@
                 <div class="button-group" style="margin-top: 14px;">
                     <button class="btn-secondary" onclick="clearImportedSpending()">가져오기 초기화</button>
                     <button class="btn-primary" onclick="importUsageFiles()">사용내역 자동 반영</button>
+                </div>
+                <div class="export-actions">
+                    <button class="btn-secondary" onclick="downloadUsageTemplate()">엑셀 업로드 양식 다운로드</button>
+                    <button class="btn-secondary" onclick="downloadCurrentSpendingExcel()">현재 입력값 엑셀 다운로드</button>
+                    <button class="btn-secondary" onclick="downloadCurrentSpendingCsv()">현재 입력값 CSV 다운로드</button>
                 </div>
                 <div id="importStatus" class="import-status">지원 컬럼 예시: 이용일, 가맹점명, 이용금액, 승인금액, 결제금액. 사진은 OCR 품질에 따라 확인이 필요합니다.</div>
             </div>
@@ -1081,6 +1122,23 @@
                 <div class="empty-state-icon">✅</div>
                 <p>분석을 실행하면 최종 사용 계획이 표시됩니다.</p>
             </div>
+        </div>
+
+        <!-- TAB 7: 노션 보기 -->
+        <div class="tab-content">
+            <h2>노션용 자료 보기</h2>
+            <p style="color: #6B7280; margin-bottom: 20px;">현재 지출, 상세 결제처, 추천 카드 결과를 Notion에 붙여넣기 좋은 Markdown 문서로 변환합니다.</p>
+
+            <div class="export-panel">
+                <h3>노션 변환 자료</h3>
+                <p style="color: #6B7280; font-size: 13px; margin-top: 6px;">아래 내용을 복사해서 Notion 페이지에 붙여넣으면 표 형태로 정리됩니다. 분석 전에는 지출 입력값 중심으로 표시됩니다.</p>
+                <div class="export-actions">
+                    <button class="btn-primary" onclick="refreshNotionPreview()">노션 자료 새로고침</button>
+                    <button class="btn-secondary" onclick="copyNotionMarkdown()">노션용 Markdown 복사</button>
+                    <button class="btn-secondary" onclick="downloadNotionMarkdown()">Markdown 다운로드</button>
+                </div>
+            </div>
+            <textarea id="notionPreview" class="notion-preview" readonly></textarea>
         </div>
     </div>
 
@@ -1904,6 +1962,244 @@
             if (excelInput) excelInput.value = '';
             if (imageInput) imageInput.value = '';
             setImportStatus('가져오기 파일 선택을 초기화했습니다.');
+        }
+
+        function todayStamp() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            return `${y}${m}${d}`;
+        }
+
+        function downloadBlob(filename, content, mimeType) {
+            const blob = content instanceof Blob ? content : new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function csvEscape(value) {
+            const text = String(value ?? '');
+            return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+        }
+
+        function rowsToCsv(rows) {
+            if (!rows.length) return '';
+            const headers = Object.keys(rows[0]);
+            const lines = [
+                headers.map(csvEscape).join(','),
+                ...rows.map(row => headers.map(header => csvEscape(row[header])).join(','))
+            ];
+            return `\uFEFF${lines.join('\n')}`;
+        }
+
+        function safeSheetName(name) {
+            return String(name).replace(/[\\/?*\[\]:]/g, '').slice(0, 31) || 'Sheet1';
+        }
+
+        function downloadWorkbook(filename, sheets) {
+            if (!window.XLSX) {
+                showMessage('엑셀 다운로드 모듈이 아직 로드되지 않았습니다. 잠시 후 다시 시도하세요.', 'warning');
+                return;
+            }
+            const workbook = XLSX.utils.book_new();
+            sheets.forEach(sheet => {
+                const worksheet = XLSX.utils.json_to_sheet(sheet.rows);
+                XLSX.utils.book_append_sheet(workbook, worksheet, safeSheetName(sheet.name));
+            });
+            XLSX.writeFile(workbook, filename);
+        }
+
+        function getInputLabel(input) {
+            const groupLabel = input.closest('.input-group')?.querySelector('label')?.textContent;
+            const merchantLabel = input.closest('.merchant-row')?.querySelector('label')?.textContent;
+            return String(groupLabel || merchantLabel || input.id).replace(/\s+/g, ' ').trim();
+        }
+
+        const topInputCategoryMap = {
+            housing: '주거',
+            utilities: '공과금',
+            telecom: '통신',
+            insurance: '보험',
+            subscription: '구독',
+            transit: '대중교통',
+            taxi: '택시',
+            fuel: '주유',
+            grocery: '마트',
+            dining: '외식',
+            delivery: '배달',
+            cafe: '카페',
+            onlineShopping: '온라인쇼핑',
+            convenience: '편의점',
+            largeMart: '대형마트',
+            medical: '의료',
+            beautySports: '미용/스포츠',
+            education: '학원/교육',
+            entertainment: '영화/문화',
+            others: '기타'
+        };
+
+        function getTopSpendingRows() {
+            const paymentBreakdown = getPaymentBreakdown();
+            return [...document.querySelectorAll('.input-section .input-group input[type="number"]')].map(input => {
+                const category = topInputCategoryMap[input.id] || getInputLabel(input).replace(/^[^\w가-힣]+/, '').trim();
+                const amount = parseInt(input.value) || 0;
+                const paymentSelect = document.getElementById(`${input.id}Payment`);
+                return {
+                    대분류: category,
+                    입력ID: input.id,
+                    월평균금액: amount,
+                    결제수단: paymentSelect?.value === 'transfer' ? '이체/현금' : '카드',
+                    카드지출반영액: paymentBreakdown.card[category] || 0,
+                    이체현금반영액: paymentBreakdown.transfer[category] || 0
+                };
+            });
+        }
+
+        function getMerchantSpendingRows() {
+            return [...document.querySelectorAll('.merchant-row')].map(row => {
+                const input = row.querySelector('input[type="number"]');
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                const cardSelect = row.querySelector('.merchant-card-select');
+                const note = row.querySelector('.merchant-switch-note');
+                return {
+                    상세항목: getInputLabel(input),
+                    입력ID: input?.id || '',
+                    혜택계산: checkbox?.checked ? '포함' : '제외',
+                    월평균금액: parseInt(input?.value) || 0,
+                    현재사용카드: cardSelect?.value || '',
+                    추천메모: note?.textContent || ''
+                };
+            });
+        }
+
+        function getCardResultRows() {
+            const expenses = getExpenses();
+            const totalSpending = Object.values(expenses).reduce((a, b) => a + b, 0);
+            const rows = (lastAnalysisResults || cardEvents.map(card => ({
+                ...card,
+                analysis: calculateCardBenefit(card, expenses, totalSpending)
+            })).sort((a, b) => b.analysis.firstYearNetBenefit - a.analysis.firstYearNetBenefit));
+
+            return rows.map((card, index) => ({
+                순위: index + 1,
+                카드명: card.name,
+                카드사: card.company,
+                추천혜택팩: card.analysis.selectedPackName || '',
+                월순혜택: Math.round(card.analysis.netMonthlyBenefit),
+                실질월할인율: `${(card.analysis.monthlyEffectiveRate * 100).toFixed(2)}%`,
+                첫해순혜택: Math.round(card.analysis.firstYearNetBenefit),
+                실적인정액: Math.round(card.analysis.performance.eligibleSpending),
+                실적미포함: Math.round(card.analysis.performance.excludedAmount),
+                연회비: Math.round(card.analysis.effectiveAnnualFee),
+                월할인: Math.round(card.analysis.monthlyDiscount),
+                가입혜택: Math.round(card.analysis.eventValue)
+            }));
+        }
+
+        function downloadUsageTemplate() {
+            const sampleRows = [
+                { 이용일: '2026-04-01', 가맹점명: '쿠팡', 이용금액: 90000, 메모: '카드사 엑셀에서 이 컬럼명과 비슷하면 자동 인식됩니다.' },
+                { 이용일: '2026-04-02', 가맹점명: '네이버플러스스토어', 이용금액: 60000, 메모: '' },
+                { 이용일: '2026-04-03', 가맹점명: '배달의민족', 이용금액: 45000, 메모: '' }
+            ];
+            downloadWorkbook(`카드사용내역_업로드양식_${todayStamp()}.xlsx`, [{ name: '사용내역', rows: sampleRows }]);
+        }
+
+        function downloadCurrentSpendingExcel() {
+            syncTopInputsFromDetails();
+            saveExpenses();
+            downloadWorkbook(`내카드_지출혜택분석_${todayStamp()}.xlsx`, [
+                { name: '월지출', rows: getTopSpendingRows() },
+                { name: '상세결제처', rows: getMerchantSpendingRows() },
+                { name: '카드비교', rows: getCardResultRows() }
+            ]);
+        }
+
+        function downloadCurrentSpendingCsv() {
+            const rows = [
+                ...getTopSpendingRows().map(row => ({ 구분: '월지출', ...row })),
+                ...getMerchantSpendingRows().map(row => ({ 구분: '상세결제처', ...row }))
+            ];
+            downloadBlob(`내카드_지출입력값_${todayStamp()}.csv`, rowsToCsv(rows), 'text/csv;charset=utf-8');
+        }
+
+        function escapeMarkdown(value) {
+            return String(value ?? '').replace(/\|/g, '\\|').replace(/\n/g, '<br>');
+        }
+
+        function markdownTable(rows, columns) {
+            if (!rows.length) return '자료 없음\n';
+            const header = `| ${columns.join(' | ')} |`;
+            const separator = `| ${columns.map(() => '---').join(' | ')} |`;
+            const body = rows.map(row => `| ${columns.map(col => escapeMarkdown(row[col])).join(' | ')} |`);
+            return [header, separator, ...body].join('\n');
+        }
+
+        function buildNotionMarkdown() {
+            syncTopInputsFromDetails();
+            const paymentBreakdown = getPaymentBreakdown();
+            const totalSpending = Object.values(paymentBreakdown.raw).reduce((sum, value) => sum + value, 0);
+            const cardSpending = Object.values(paymentBreakdown.card).reduce((sum, value) => sum + value, 0);
+            const cardRows = getCardResultRows().slice(0, 8);
+            const topRows = getTopSpendingRows()
+                .filter(row => row.월평균금액 > 0)
+                .sort((a, b) => b.월평균금액 - a.월평균금액);
+            const merchantRows = getMerchantSpendingRows()
+                .filter(row => row.월평균금액 > 0)
+                .sort((a, b) => b.월평균금액 - a.월평균금액);
+            const bestComboText = lastBestCombo
+                ? `${lastBestCombo.cards.map(card => card.name).join(' + ')} / 월 순혜택 ${formatSignedWon(lastBestCombo.netMonthlyBenefit)}`
+                : '분석 실행 후 표시';
+
+            return [
+                `# 내 카드 실질혜택 분석 (${new Date().toLocaleDateString('ko-KR')})`,
+                '',
+                '## 핵심 요약',
+                `- 월 총 지출: ${formatWon(totalSpending)}`,
+                `- 카드지출: ${formatWon(cardSpending)}`,
+                `- 이체/현금: ${formatWon(totalSpending - cardSpending)}`,
+                `- 단독 추천 카드: ${cardRows[0] ? `${cardRows[0].카드명} / 월 순혜택 ${formatSignedWon(cardRows[0].월순혜택)}` : '분석 전'}`,
+                `- 조합 추천: ${bestComboText}`,
+                '',
+                '## 월 지출 입력값',
+                markdownTable(topRows, ['대분류', '월평균금액', '결제수단', '카드지출반영액', '이체현금반영액']),
+                '',
+                '## 혜택 대상처 상세',
+                markdownTable(merchantRows, ['상세항목', '혜택계산', '월평균금액', '현재사용카드', '추천메모']),
+                '',
+                '## 카드별 추천 결과',
+                markdownTable(cardRows, ['순위', '카드명', '카드사', '추천혜택팩', '월순혜택', '실질월할인율', '첫해순혜택', '실적인정액', '실적미포함']),
+                ''
+            ].join('\n');
+        }
+
+        function refreshNotionPreview() {
+            const preview = document.getElementById('notionPreview');
+            if (preview) preview.value = buildNotionMarkdown();
+        }
+
+        async function copyNotionMarkdown() {
+            const markdown = buildNotionMarkdown();
+            refreshNotionPreview();
+            try {
+                await navigator.clipboard.writeText(markdown);
+                showMessage('노션용 Markdown을 복사했습니다. Notion 페이지에 붙여넣으면 표로 정리됩니다.', 'success');
+            } catch (error) {
+                showMessage('브라우저 권한 때문에 자동 복사가 막혔습니다. 아래 미리보기 내용을 직접 복사하세요.', 'warning');
+            }
+        }
+
+        function downloadNotionMarkdown() {
+            const markdown = buildNotionMarkdown();
+            refreshNotionPreview();
+            downloadBlob(`내카드_노션정리_${todayStamp()}.md`, markdown, 'text/markdown;charset=utf-8');
         }
 
         function getRawExpenses() {
@@ -2799,6 +3095,9 @@
             document.querySelectorAll('.tab-content').forEach((content, i) => {
                 content.classList.toggle('active', i === index);
             });
+            if (index === 6) {
+                refreshNotionPreview();
+            }
         }
 
         // 메시지 표시
@@ -2816,6 +3115,7 @@
             setupInputSync();
             updateComparisonTable();
             updateTrapChecklist(cardEvents[0]);
+            refreshNotionPreview();
         });
     </script>
 </body>
