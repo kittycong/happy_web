@@ -986,6 +986,7 @@
                     <button class="btn-secondary" onclick="clearImportedSpending()">가져오기 초기화</button>
                     <button class="btn-secondary" onclick="saveDriveCsvUrl()">Drive 링크 저장</button>
                     <button class="btn-secondary" onclick="importDriveSheetCsv()">Drive/Sheets 불러오기</button>
+                    <button class="btn-secondary" onclick="window.open('https://drive.google.com/file/d/1G0g-HbNq5CtACRxBatNH1cJVwIJ8YqP8/view?usp=drivesdk', '_blank')">Drive 백업 파일 열기</button>
                     <button class="btn-primary" onclick="importUsageFiles()">사용내역 자동 반영</button>
                 </div>
                 <div class="export-actions">
@@ -993,7 +994,7 @@
                     <button class="btn-secondary" onclick="downloadCurrentSpendingExcel()">현재 입력값 엑셀 다운로드</button>
                     <button class="btn-secondary" onclick="downloadCurrentSpendingCsv()">현재 입력값 CSV 다운로드</button>
                 </div>
-                <div id="importStatus" class="import-status">지원 컬럼 예시: 이용일, 가맹점명, 이용금액, 승인금액, 결제금액. Google Sheets는 파일 > 공유 > 웹에 게시 > CSV 링크를 넣으면 됩니다. <a href="https://drive.google.com/file/d/1G0g-HbNq5CtACRxBatNH1cJVwIJ8YqP8/view?usp=drivesdk" target="_blank" rel="noopener">Drive 백업 파일 열기</a></div>
+                <div id="importStatus" class="import-status">지원 컬럼 예시: 이용일, 가맹점명, 이용금액, 승인금액, 결제금액. Google Sheets는 파일 > 공유 > 웹에 게시 > CSV 링크를 넣으면 됩니다.</div>
                 <div id="importReviewPanel" class="review-panel">
                     <div class="review-panel-header">
                         <h3>가져온 거래 확인</h3>
