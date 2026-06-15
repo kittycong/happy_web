@@ -977,9 +977,15 @@
                             <option value="add">현재 입력값에 더하기</option>
                         </select>
                     </div>
+                    <div class="import-control">
+                        <label>Google Sheets/Drive CSV URL</label>
+                        <input type="text" id="driveCsvUrl" placeholder="게시된 Google Sheets CSV 링크">
+                    </div>
                 </div>
                 <div class="button-group" style="margin-top: 14px;">
                     <button class="btn-secondary" onclick="clearImportedSpending()">가져오기 초기화</button>
+                    <button class="btn-secondary" onclick="saveDriveCsvUrl()">Drive 링크 저장</button>
+                    <button class="btn-secondary" onclick="importDriveSheetCsv()">Drive/Sheets 불러오기</button>
                     <button class="btn-primary" onclick="importUsageFiles()">사용내역 자동 반영</button>
                 </div>
                 <div class="export-actions">
@@ -987,7 +993,7 @@
                     <button class="btn-secondary" onclick="downloadCurrentSpendingExcel()">현재 입력값 엑셀 다운로드</button>
                     <button class="btn-secondary" onclick="downloadCurrentSpendingCsv()">현재 입력값 CSV 다운로드</button>
                 </div>
-                <div id="importStatus" class="import-status">지원 컬럼 예시: 이용일, 가맹점명, 이용금액, 승인금액, 결제금액. 사진은 OCR 품질에 따라 확인이 필요합니다.</div>
+                <div id="importStatus" class="import-status">지원 컬럼 예시: 이용일, 가맹점명, 이용금액, 승인금액, 결제금액. Google Sheets는 파일 > 공유 > 웹에 게시 > CSV 링크를 넣으면 됩니다. <a href="https://drive.google.com/file/d/1G0g-HbNq5CtACRxBatNH1cJVwIJ8YqP8/view?usp=drivesdk" target="_blank" rel="noopener">Drive 백업 파일 열기</a></div>
                 <div id="importReviewPanel" class="review-panel">
                     <div class="review-panel-header">
                         <h3>가져온 거래 확인</h3>
@@ -2112,6 +2118,47 @@
         function setImportStatus(message) {
             const el = document.getElementById('importStatus');
             if (el) el.textContent = message;
+        }
+
+        function saveDriveCsvUrl() {
+            const input = document.getElementById('driveCsvUrl');
+            const url = input?.value.trim();
+            if (!url) {
+                setImportStatus('저장할 Google Sheets/Drive CSV URL을 입력하세요.');
+                return;
+            }
+            localStorage.setItem('driveCsvUrl', url);
+            setImportStatus('Google Sheets/Drive CSV URL을 저장했습니다.');
+        }
+
+        function loadDriveCsvUrl() {
+            const input = document.getElementById('driveCsvUrl');
+            if (input) input.value = localStorage.getItem('driveCsvUrl') || '';
+        }
+
+        async function importDriveSheetCsv() {
+            const input = document.getElementById('driveCsvUrl');
+            const url = input?.value.trim() || localStorage.getItem('driveCsvUrl') || '';
+            if (!url) {
+                setImportStatus('Google Sheets/Drive CSV URL을 입력하세요. Google Sheets는 웹에 게시 후 CSV 링크를 사용합니다.');
+                return;
+            }
+            try {
+                localStorage.setItem('driveCsvUrl', url);
+                setImportStatus('Google Sheets/Drive CSV를 불러오는 중입니다.');
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const text = await response.text();
+                const rows = parseCsvText(text);
+                if (!rows.length) {
+                    setImportStatus('CSV에서 읽을 수 있는 사용내역이 없습니다. 컬럼명과 게시 링크를 확인하세요.');
+                    return;
+                }
+                renderImportReview(rows);
+                setImportStatus(`${rows.length}건을 Google Sheets/Drive에서 읽었습니다. 검토 후 반영하세요.`);
+            } catch (error) {
+                setImportStatus(`Drive/Sheets 불러오기 실패: ${error.message}. 비공개 Drive 파일은 직접 fetch할 수 없으므로 Google Sheets "웹에 게시 > CSV" 링크를 사용하세요.`);
+            }
         }
 
         function parseMoney(value) {
@@ -3582,6 +3629,7 @@
             setupInputSync();
             updateComparisonTable();
             updateTrapChecklist(cardEvents[0]);
+            loadDriveCsvUrl();
             refreshNotionPreview();
         });
     </script>
