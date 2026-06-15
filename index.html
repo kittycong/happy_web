@@ -724,6 +724,45 @@
             line-height: 1.5;
         }
 
+        .review-panel {
+            display: none;
+            margin-top: 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: white;
+            overflow: hidden;
+        }
+
+        .review-panel-header {
+            padding: 14px 16px;
+            background: #F8FAFC;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .review-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .review-table th,
+        .review-table td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .review-table input,
+        .review-table select {
+            width: 100%;
+            min-width: 120px;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+        }
+
         .export-panel {
             border: 1px solid var(--border);
             border-radius: 12px;
@@ -804,6 +843,10 @@
             .comparison-table {
                 min-width: 980px;
                 font-size: 13px;
+            }
+
+            .review-table {
+                min-width: 760px;
             }
 
             .card-grid {
@@ -925,6 +968,29 @@
                     <button class="btn-secondary" onclick="downloadCurrentSpendingCsv()">현재 입력값 CSV 다운로드</button>
                 </div>
                 <div id="importStatus" class="import-status">지원 컬럼 예시: 이용일, 가맹점명, 이용금액, 승인금액, 결제금액. 사진은 OCR 품질에 따라 확인이 필요합니다.</div>
+                <div id="importReviewPanel" class="review-panel">
+                    <div class="review-panel-header">
+                        <h3>가져온 거래 확인</h3>
+                        <p style="color: #6B7280; font-size: 13px; margin-top: 4px;">가맹점명, 금액, 혜택 분류를 확인한 뒤 반영하세요. 수정한 분류는 다음 자동분류에 학습됩니다.</p>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="review-table">
+                            <thead>
+                                <tr>
+                                    <th>가맹점</th>
+                                    <th>금액</th>
+                                    <th>혜택 분류</th>
+                                    <th>인식 방식</th>
+                                </tr>
+                            </thead>
+                            <tbody id="importReviewBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="button-group" style="padding: 14px 16px;">
+                        <button class="btn-secondary" onclick="clearImportReview()">검토 목록 비우기</button>
+                        <button class="btn-primary" onclick="applyReviewedImport()">확인한 거래 반영</button>
+                    </div>
+                </div>
             </div>
 
             <div class="input-section">
@@ -1178,7 +1244,20 @@
         <!-- TAB 4: 조합 최적화 -->
         <div class="tab-content">
             <h2>카드 조합 최적화</h2>
-            <p style="color: #6B7280; margin-bottom: 20px;">2장 조합 기준으로 겹치는 혜택은 중복 계산하지 않고, 카테고리별 유리한 카드에 지출을 배분한 예상 순혜택입니다.</p>
+            <p style="color: #6B7280; margin-bottom: 20px;">선택한 카드 장수 기준으로 겹치는 혜택은 중복 계산하지 않고, 카테고리별 유리한 카드에 지출을 배분한 예상 순혜택입니다.</p>
+            <div class="export-panel">
+                <h3>조합 장수 선택</h3>
+                <div class="import-grid" style="margin-top: 12px;">
+                    <div class="import-control">
+                        <label>분석할 카드 장수</label>
+                        <select id="comboSize" onchange="rerenderComboOptimizer()">
+                            <option value="2" selected>2장 조합</option>
+                            <option value="3">3장 조합</option>
+                            <option value="4">4장 조합</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
             <div id="comboResults" class="card-grid"></div>
             <div id="emptyCombo" class="empty-state">
                 <div class="empty-state-icon">🔗</div>
@@ -1601,6 +1680,7 @@
         let expenseData = {};
         let lastAnalysisResults = null;
         let lastBestCombo = null;
+        let pendingImportedRows = [];
 
         const currentCardOptions = ["기존카드", "YOU Prime 카드", "My WE:SH 카드", "YOU Wish 카드", "굿데이카드", "딥드림", "로카 라이킷", "제로 에디션", "티이코노미", "탭탭오"];
         const merchantCategoryByInput = {
@@ -1668,6 +1748,35 @@
             entertainment: "card",
             others: "card"
         };
+        const importCategoryOptions = [
+            { key: "naverShopping", label: "네이버플러스스토어" },
+            { key: "coupangShopping", label: "쿠팡" },
+            { key: "musinsaShopping", label: "무신사" },
+            { key: "zigzagShopping", label: "지그재그" },
+            { key: "cm29Shopping", label: "29CM" },
+            { key: "wconceptShopping", label: "W컨셉" },
+            { key: "todayHouseShopping", label: "오늘의집" },
+            { key: "marketKurly", label: "마켓컬리" },
+            { key: "oasisMarket", label: "오아시스마켓" },
+            { key: "emartSpend", label: "이마트" },
+            { key: "tradersSpend", label: "트레이더스" },
+            { key: "lotteMartSpend", label: "롯데마트" },
+            { key: "diningDetail", label: "음식점/외식" },
+            { key: "baeminSpend", label: "배달의민족" },
+            { key: "coupangEatsSpend", label: "쿠팡이츠" },
+            { key: "cafeDetail", label: "커피전문점" },
+            { key: "gs25Spend", label: "GS25" },
+            { key: "cuSpend", label: "CU" },
+            { key: "taxiDetail", label: "택시" },
+            { key: "movieSpend", label: "영화관" },
+            { key: "telecomDetail", label: "이동통신 자동납부" },
+            { key: "insuranceDetail", label: "보험료" },
+            { key: "fuel", label: "주유/충전" },
+            { key: "medical", label: "의료" },
+            { key: "beautySports", label: "미용/스포츠" },
+            { key: "education", label: "학원/교육" },
+            { key: "others", label: "기타" }
+        ];
 
         function paymentLabel(value) {
             return value === "transfer" ? "💵 현금/이체" : "💳 카드지출";
@@ -2002,8 +2111,41 @@
             return undefined;
         }
 
+        function normalizeMerchantName(text) {
+            return String(text || '').toLowerCase().replace(/\s+/g, '');
+        }
+
+        function getMerchantLearnings() {
+            try {
+                return JSON.parse(localStorage.getItem('merchantLearnings') || '{}');
+            } catch {
+                return {};
+            }
+        }
+
+        function saveMerchantLearning(merchant, key) {
+            const normalized = normalizeMerchantName(merchant);
+            if (!normalized || !key) return;
+            const learnings = getMerchantLearnings();
+            learnings[normalized] = {
+                key,
+                merchant,
+                count: (learnings[normalized]?.count || 0) + 1,
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem('merchantLearnings', JSON.stringify(learnings));
+        }
+
+        function getImportCategoryLabel(key) {
+            return importCategoryOptions.find(option => option.key === key)?.label || key || '기타';
+        }
+
         function classifyMerchant(text) {
-            const name = String(text || '').toLowerCase().replace(/\s+/g, '');
+            const name = normalizeMerchantName(text);
+            const learned = getMerchantLearnings()[name];
+            if (learned?.key) {
+                return { key: learned.key, source: "학습" };
+            }
             const rules = [
                 { match: ["네이버", "naver"], target: "naverShopping", check: "chkNaver" },
                 { match: ["쿠팡이츠", "coupangeats"], target: "coupangEatsSpend", check: "chkCoupangEats" },
@@ -2033,7 +2175,65 @@
                 { match: ["음식", "식당", "레스토랑", "분식", "치킨", "피자", "고기", "한식", "중식", "일식"], target: "diningDetail", check: "chkDining" },
                 { match: ["편의점"], target: "gs25Spend", check: "chkGs25" }
             ];
-            return rules.find(rule => rule.match.some(keyword => name.includes(keyword))) || { top: "others" };
+            const matched = rules.find(rule => rule.match.some(keyword => name.includes(keyword)));
+            if (matched) return { ...matched, key: matched.target || matched.top, source: "자동분류" };
+            return { top: "others", key: "others", source: "확인필요" };
+        }
+
+        function renderImportReview(rows) {
+            pendingImportedRows = rows.map((row, index) => {
+                const classified = classifyMerchant(row.merchant);
+                return {
+                    id: index,
+                    merchant: row.merchant || '',
+                    amount: Math.round(row.amount || 0),
+                    key: classified.key || classified.target || classified.top || 'others',
+                    source: classified.source || '자동분류'
+                };
+            });
+
+            const panel = document.getElementById('importReviewPanel');
+            const body = document.getElementById('importReviewBody');
+            if (!panel || !body) return;
+            body.innerHTML = pendingImportedRows.map(row => `
+                <tr data-import-id="${row.id}">
+                    <td><input type="text" class="review-merchant" value="${String(row.merchant).replace(/"/g, '&quot;')}"></td>
+                    <td><input type="number" class="review-amount" value="${row.amount}"></td>
+                    <td>
+                        <select class="review-category">
+                            ${importCategoryOptions.map(option => `<option value="${option.key}" ${option.key === row.key ? 'selected' : ''}>${option.label}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>${row.source}</td>
+                </tr>
+            `).join('');
+            panel.style.display = pendingImportedRows.length ? 'block' : 'none';
+        }
+
+        function readReviewedImportRows() {
+            return [...document.querySelectorAll('#importReviewBody tr')].map(row => ({
+                merchant: row.querySelector('.review-merchant')?.value.trim() || '',
+                amount: parseMoney(row.querySelector('.review-amount')?.value),
+                key: row.querySelector('.review-category')?.value || 'others'
+            })).filter(row => row.amount > 0);
+        }
+
+        function clearImportReview() {
+            pendingImportedRows = [];
+            const body = document.getElementById('importReviewBody');
+            const panel = document.getElementById('importReviewPanel');
+            if (body) body.innerHTML = '';
+            if (panel) panel.style.display = 'none';
+            setImportStatus('검토 목록을 비웠습니다.');
+        }
+
+        function applyReviewedImport() {
+            const rows = readReviewedImportRows();
+            rows.forEach(row => saveMerchantLearning(row.merchant, row.key));
+            applyImportedTotals(rows);
+            clearImportReview();
+            setImportStatus(`${rows.length}건을 확인 후 반영했습니다. 수정한 분류는 다음 자동분류에 학습됩니다.`);
+            if (lastAnalysisResults) analyzeCards();
         }
 
         function addAmountToInput(inputId, amount, mode) {
@@ -2051,8 +2251,7 @@
 
             rows.forEach(row => {
                 if (!row.amount) return;
-                const classified = classifyMerchant(row.merchant);
-                const key = classified.target || classified.top || "others";
+                const key = row.key || classifyMerchant(row.merchant).key || "others";
                 totals[key] = (totals[key] || 0) + row.amount;
                 importedTotal += row.amount;
             });
@@ -2170,8 +2369,8 @@
                     return;
                 }
 
-                applyImportedTotals(rows);
-                if (lastAnalysisResults) analyzeCards();
+                renderImportReview(rows);
+                setImportStatus(`${rows.length}건을 읽었습니다. 아래 검토 표에서 분류를 확인한 뒤 반영하세요.`);
             } catch (error) {
                 setImportStatus(`가져오기 실패: ${error.message}`);
             }
@@ -2182,6 +2381,7 @@
             const imageInput = document.getElementById('imageImport');
             if (excelInput) excelInput.value = '';
             if (imageInput) imageInput.value = '';
+            clearImportReview();
             setImportStatus('가져오기 파일 선택을 초기화했습니다.');
         }
 
@@ -3014,15 +3214,38 @@
             });
         }
 
+        function generateCardCombinations(items, size, start = 0, picked = [], output = []) {
+            if (picked.length === size) {
+                output.push([...picked]);
+                return output;
+            }
+            for (let i = start; i <= items.length - (size - picked.length); i++) {
+                picked.push(items[i]);
+                generateCardCombinations(items, size, i + 1, picked, output);
+                picked.pop();
+            }
+            return output;
+        }
+
+        function rerenderComboOptimizer() {
+            if (!lastAnalysisResults) {
+                showMessage('먼저 분석 시작을 눌러주세요.', 'warning');
+                return;
+            }
+            const cardSpending = Object.values(getPaymentBreakdown().card).reduce((a, b) => a + b, 0);
+            const bestCombo = updateComboOptimizer(lastAnalysisResults, cardSpending);
+            refreshMerchantSwitchIndicators(bestCombo);
+            updateFinalSummary(lastAnalysisResults, bestCombo, Object.values(getPaymentBreakdown().raw).reduce((a, b) => a + b, 0), cardSpending, getPaymentBreakdown());
+        }
+
         function updateComboOptimizer(results, totalSpending) {
             const comboResults = document.getElementById('comboResults');
             const emptyCombo = document.getElementById('emptyCombo');
             if (!comboResults || !emptyCombo) return;
 
+            const comboSize = Math.min(Math.max(parseInt(document.getElementById('comboSize')?.value) || 2, 2), 4);
             const combos = [];
-            for (let i = 0; i < results.length; i++) {
-                for (let j = i + 1; j < results.length; j++) {
-                    const cards = [results[i], results[j]];
+            generateCardCombinations(results, comboSize).forEach(cards => {
                     const bestByArea = new Map();
 
                     cards.forEach(card => {
@@ -3055,8 +3278,7 @@
                         firstYearNetBenefit,
                         effectiveRate: totalSpending > 0 ? netMonthlyBenefit / totalSpending : 0
                     });
-                }
-            }
+            });
 
             const topCombos = combos.sort((a, b) => b.firstYearNetBenefit - a.firstYearNetBenefit).slice(0, 6);
             lastBestCombo = topCombos[0] || null;
@@ -3065,6 +3287,7 @@
                 return `
                     <div class="card-item ${index === 0 ? 'top' : ''}">
                         <div class="card-rank">${index + 1}</div>
+                        <div class="pack-tag">${comboSize}장 조합</div>
                         <div class="card-name">${combo.cards.map(card => card.name).join(' + ')}</div>
                         <div class="card-company">${combo.cards.map(card => card.company).join(' · ')}</div>
                         <div class="card-stat">
