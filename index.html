@@ -7378,6 +7378,97 @@
             return profile.minSpending ? '실적 인정 예상' : '무실적 혜택';
         }
 
+        function getPerformanceFillRecommendations(profile, estimate, type = 'event') {
+            const expenses = getExpenses();
+            const minSpending = profile.minSpending || 0;
+            const eligibleSpending = estimate.performance?.eligibleSpending ?? estimate.eligibleSpending ?? 0;
+            const shortage = Math.max(minSpending - eligibleSpending, 0);
+            const policy = type === 'event'
+                ? getPerformancePolicy(profile)
+                : { excludedCategories: profile.excludedCategories || [], excludesDiscountedSales: false };
+            const discountedCategories = new Set((type === 'event' ? estimate.categoryDetails || [] : estimate.details || [])
+                .flatMap(detail => getDetailCategories(detail)));
+            const riskyCategories = new Set([...(policy.excludedCategories || [])]);
+            if (policy.excludesDiscountedSales) {
+                discountedCategories.forEach(category => riskyCategories.add(category));
+            }
+
+            const preferredOrder = [
+                "기타", "의료", "교육", "미용스포츠", "편의점", "주유", "외식", "배달", "카페",
+                "온라인쇼핑", "마트", "대형마트", "통신", "보험", "구독", "AI구독", "구독서비스", "앱결제",
+                "대중교통", "택시", "주거", "공과금"
+            ];
+
+            const candidates = preferredOrder
+                .map(category => ({
+                    category,
+                    amount: expenses[category] || 0,
+                    risk: riskyCategories.has(category) ? "제외위험" : "우선후보",
+                    reason: riskyCategories.has(category)
+                        ? "할인팩/공과금 등 제외 가능성이 있어 보조 후보로만 사용"
+                        : "할인팩 미적용 또는 제외 가능성이 낮은 일반 결제 후보"
+                }))
+                .filter(item => item.amount > 0)
+                .sort((a, b) => {
+                    if (a.risk !== b.risk) return a.risk === "우선후보" ? -1 : 1;
+                    return b.amount - a.amount;
+                });
+
+            let remaining = shortage || minSpending;
+            const selected = [];
+            candidates.forEach(item => {
+                if (remaining <= 0 && selected.length >= 4) return;
+                const useAmount = shortage ? Math.min(item.amount, remaining) : item.amount;
+                if (useAmount <= 0) return;
+                selected.push({ ...item, useAmount });
+                remaining -= useAmount;
+            });
+
+            return {
+                shortage,
+                targetAmount: shortage || minSpending,
+                remaining: Math.max(remaining, 0),
+                selected: selected.slice(0, 8)
+            };
+        }
+
+        function renderPerformanceFillRecommendations(profile, estimate, type = 'event') {
+            const plan = getPerformanceFillRecommendations(profile, estimate, type);
+            const title = plan.shortage > 0
+                ? `부족 실적 ${formatWon(plan.shortage)} 보충 후보`
+                : `할인매출 제외 가정 시 안전 실적 후보`;
+            return `
+                <div class="table-wrap" style="margin-top: 12px;">
+                    <table class="comparison-table performance-detail-table">
+                        <thead>
+                            <tr>
+                                <th colspan="5">${title}</th>
+                            </tr>
+                            <tr>
+                                <th>우선순위</th>
+                                <th>포함시킬 지출분류</th>
+                                <th>사용 가능액</th>
+                                <th>실적 채움 예상액</th>
+                                <th>판정/메모</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${plan.selected.length ? plan.selected.map((item, index) => `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td><strong>${escapeHtml(item.category)}</strong></td>
+                                    <td>${formatWon(item.amount)}</td>
+                                    <td><strong>${formatWon(item.useAmount)}</strong></td>
+                                    <td><span class="badge ${item.risk === '우선후보' ? 'badge-success' : 'badge-warning'}">${item.risk}</span><span class="source-note">${escapeHtml(item.reason)}</span></td>
+                                </tr>
+                            `).join('') : '<tr><td colspan="5">현재 입력 지출에서 실적 보충 후보가 없습니다.</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+                <span class="source-note">${plan.remaining > 0 ? `현재 입력값만으로는 ${formatWon(plan.remaining)} 추가 지출 후보가 더 필요합니다.` : '위 후보만으로 목표 실적을 채울 수 있는 것으로 예상됩니다.'} 실제 인정 여부는 카드사 상품설명서의 제외 항목 기준으로 최종 확인하세요.</span>
+            `;
+        }
+
         function renderPerformanceDetailTable(profile, estimate, type = 'owned') {
             const details = type === 'event'
                 ? (estimate.categoryDetails || [])
@@ -7426,6 +7517,7 @@
                     </table>
                 </div>
                 <span class="source-note">실적 제외 가능 항목: ${excludedDetails.length ? excludedDetails.join(' · ') : '현재 입력 기준 별도 제외 예상 없음'} · 무이자/부분무이자할부는 카드별 상품설명서 기준으로 최종 확인</span>
+                ${renderPerformanceFillRecommendations(profile, estimate, type)}
             `;
         }
 
