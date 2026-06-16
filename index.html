@@ -1641,6 +1641,19 @@
             color: var(--muted);
         }
 
+        .performance-detail-table {
+            min-width: 760px;
+        }
+
+        .performance-detail-table th,
+        .performance-detail-table td {
+            vertical-align: top;
+        }
+
+        .performance-detail-table .source-note {
+            margin-top: 2px;
+        }
+
         .event-rank-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -7337,6 +7350,85 @@
             `;
         }
 
+        function getDetailCategories(detail) {
+            return detail.categories || detail.expandedCategories || [detail.category || detail.label].filter(Boolean);
+        }
+
+        function getRuleDisplayText(detail) {
+            const parts = [];
+            if (detail.rate) parts.push(`${formatRate(detail.rate)} 할인/적립`);
+            if (detail.fixed) parts.push(`${formatWon(detail.fixed)} 정액`);
+            if (detail.limit || detail.cap) parts.push(`월 한도 ${formatWon(detail.limit || detail.cap)}`);
+            return parts.join(' · ') || '상품별 산식 확인';
+        }
+
+        function getPerformanceRiskText(profile, detail, type) {
+            const categories = getDetailCategories(detail);
+            if (type === 'event') {
+                const policy = getPerformancePolicy(profile);
+                const excluded = categories.filter(category => policy.excludedCategories?.includes(category));
+                if (policy.excludesDiscountedSales && (detail.benefit || 0) > 0) {
+                    return `제외 가능: 할인 적용 매출(${formatWon(detail.discountedSpend || detail.expense || 0)})`;
+                }
+                if (excluded.length) return `제외 가능: ${excluded.join(', ')}`;
+                return policy.note || '상품설명서 확인 필요';
+            }
+            const excluded = categories.filter(category => profile.excludedCategories?.includes(category));
+            if (excluded.length) return `제외 가능: ${excluded.join(', ')}`;
+            return profile.minSpending ? '실적 인정 예상' : '무실적 혜택';
+        }
+
+        function renderPerformanceDetailTable(profile, estimate, type = 'owned') {
+            const details = type === 'event'
+                ? (estimate.categoryDetails || [])
+                : (estimate.details || []);
+            const rows = details
+                .filter(detail => (detail.expense || detail.spend || detail.benefit || 0) > 0)
+                .map(detail => {
+                    const label = detail.label || detail.category || '할인 항목';
+                    const categories = getDetailCategories(detail);
+                    const spend = detail.expense ?? detail.spend ?? detail.discountedSpend ?? 0;
+                    const benefit = detail.benefit || 0;
+                    const risk = getPerformanceRiskText(profile, detail, type);
+                    return `
+                        <tr>
+                            <td><strong>${escapeHtml(label)}</strong><span class="source-note">${escapeHtml(categories.join(', '))}</span></td>
+                            <td>${formatWon(spend)}</td>
+                            <td>${getRuleDisplayText(detail)}</td>
+                            <td><strong>${formatWon(benefit)}</strong></td>
+                            <td>${escapeHtml(risk)}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+            const excludedDetails = type === 'event'
+                ? (estimate.performance?.excludedDetails || [])
+                : Object.entries((profile.excludedCategories || []).reduce((map, category) => {
+                    map[category] = estimate.expenses?.[category] || 0;
+                    return map;
+                }, {})).filter(([, amount]) => amount > 0).map(([category, amount]) => `${category} ${formatWon(amount)}`);
+
+            return `
+                <div class="table-wrap" style="margin-top: 12px;">
+                    <table class="comparison-table performance-detail-table">
+                        <thead>
+                            <tr>
+                                <th>할인 항목</th>
+                                <th>대상 지출</th>
+                                <th>할인 산식/한도</th>
+                                <th>예상 할인</th>
+                                <th>실적 인정·제외 체크</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows || '<tr><td colspan="5">현재 입력 지출에서 적용 가능한 할인 항목이 없습니다.</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+                <span class="source-note">실적 제외 가능 항목: ${excludedDetails.length ? excludedDetails.join(' · ') : '현재 입력 기준 별도 제외 예상 없음'} · 무이자/부분무이자할부는 카드별 상품설명서 기준으로 최종 확인</span>
+            `;
+        }
+
         function getCategorySpend(expenses, categories) {
             return categories.reduce((sum, category) => sum + (expenses[category] || 0), 0);
         }
@@ -7453,35 +7545,59 @@
             const empty = document.getElementById('emptyDiscountPerformance');
             if (!grid || !empty) return;
             const fixedMap = getFixedExpensesByCard(getCurrentCardUsageRows(lastBestCombo));
-            const rows = ownedCardProfiles.map(profile => ({ profile, estimate: estimateOwnedCardProfile(profile, fixedMap) }))
-                .sort((a, b) => b.estimate.netMonthlyBenefit - a.estimate.netMonthlyBenefit);
+            const expenses = getExpenses();
+            const totalSpending = Object.values(expenses).reduce((sum, amount) => sum + amount, 0);
+            const ownedRows = ownedCardProfiles.map(profile => ({
+                type: 'owned',
+                profile,
+                estimate: estimateOwnedCardProfile(profile, fixedMap)
+            }));
+            const eventRows = (results || []).map(card => ({
+                type: 'event',
+                profile: card,
+                estimate: card.analysis || calculateCardBenefit(card, expenses, totalSpending)
+            }));
+            const rows = [...ownedRows, ...eventRows]
+                .sort((a, b) => (b.estimate.firstYearNetBenefit ?? b.estimate.netMonthlyBenefit) - (a.estimate.firstYearNetBenefit ?? a.estimate.netMonthlyBenefit));
 
-            grid.innerHTML = rows.map(({ profile, estimate }) => {
-                const visibleRules = estimate.details.filter(item => item.spend > 0 || item.benefit > 0).slice(0, 5);
+            grid.innerHTML = rows.map(({ type, profile, estimate }) => {
+                const isEvent = type === 'event';
+                const displayName = profile.name;
+                const issuer = profile.issuer || profile.company || '';
+                const source = isEvent
+                    ? `${profile.channel || '이벤트'}${estimate.selectedPackName ? ` · ${estimate.selectedPackName}` : ''}`
+                    : profile.source;
+                const minSpending = profile.minSpending || 0;
+                const eligibleSpending = estimate.performance?.eligibleSpending ?? estimate.eligibleSpending ?? 0;
+                const excludedAmount = estimate.performance?.excludedAmount ?? estimate.excludedAmount ?? 0;
+                const meetsMinSpending = estimate.performance?.meetsMinSpending ?? estimate.meetsMinSpending ?? eligibleSpending >= minSpending;
+                const monthlyBenefit = estimate.monthlyDiscount ?? estimate.monthlyBenefit ?? 0;
+                const monthlyAnnualFee = estimate.monthlyAnnualFee || 0;
+                const netMonthlyBenefit = estimate.netMonthlyBenefit || 0;
                 return `
                     <div class="check-card">
-                        <h3>${profile.name}</h3>
-                        <span class="source-note">${profile.issuer} · ${profile.source}</span>
+                        <h3>${displayName}</h3>
+                        <span class="source-note">${issuer} · ${source}</span>
                         <div class="breakdown">
                             <div class="breakdown-title">실적 체크</div>
-                            <div class="breakdown-row"><span>확정 고정지출</span><strong>${estimate.fixedCount ? `${estimate.fixedCount}건 · ${formatWon(estimate.fixedTotal)}` : '미확정'}</strong></div>
-                            <div class="breakdown-row"><span>필요 실적</span><strong>${formatWon(profile.minSpending || 0)}</strong></div>
-                            <div class="breakdown-row"><span>인정 예상액</span><strong>${formatWon(estimate.eligibleSpending)}</strong></div>
-                            <div class="breakdown-row"><span>제외 예상액</span><strong>${formatWon(estimate.excludedAmount)}</strong></div>
-                            <div class="breakdown-row"><span>상태</span><strong>${estimate.meetsMinSpending ? '충족 예상' : '부족 예상'}${estimate.usesFixedExpenses ? ' · 고정기준' : ''}</strong></div>
+                            ${!isEvent ? `<div class="breakdown-row"><span>확정 고정지출</span><strong>${estimate.fixedCount ? `${estimate.fixedCount}건 · ${formatWon(estimate.fixedTotal)}` : '미확정'}</strong></div>` : ''}
+                            <div class="breakdown-row"><span>필요 실적</span><strong>${formatWon(minSpending)}</strong></div>
+                            <div class="breakdown-row"><span>인정 예상액</span><strong>${formatWon(eligibleSpending)}</strong></div>
+                            <div class="breakdown-row"><span>미포함 예상액</span><strong>${formatWon(excludedAmount)}</strong></div>
+                            <div class="breakdown-row"><span>상태</span><strong>${meetsMinSpending ? '충족 예상' : '부족 예상'}${estimate.usesFixedExpenses ? ' · 고정기준' : ''}</strong></div>
                         </div>
                         <div class="breakdown">
                             <div class="breakdown-title">혜택 예상</div>
-                            <div class="breakdown-row"><span>월 혜택</span><strong>${formatWon(estimate.monthlyBenefit)}</strong></div>
-                            <div class="breakdown-row"><span>연회비 월환산</span><strong>-${formatWon(estimate.monthlyAnnualFee)}</strong></div>
-                            <div class="breakdown-row"><span>월 순혜택</span><strong>${formatSignedWon(estimate.netMonthlyBenefit)}</strong></div>
+                            <div class="breakdown-row"><span>월 혜택</span><strong>${formatWon(monthlyBenefit)}</strong></div>
+                            ${isEvent ? `<div class="breakdown-row"><span>가입혜택 월환산</span><strong>${formatWon(estimate.eventMonthlyValue || 0)}</strong></div>` : ''}
+                            <div class="breakdown-row"><span>연회비 월환산</span><strong>-${formatWon(monthlyAnnualFee)}</strong></div>
+                            <div class="breakdown-row"><span>월 순혜택</span><strong>${formatSignedWon(netMonthlyBenefit)}</strong></div>
                         </div>
+                        ${renderPerformanceDetailTable(profile, estimate, type)}
                         <div class="check-list">
-                            ${visibleRules.length ? visibleRules.map(item => `
-                                <label><input type="checkbox" checked> ${item.label}: ${formatWon(item.spend)} 중 ${formatWon(item.benefit)} 예상</label>
-                            `).join('') : '<span class="source-note">현재 입력 지출에서 적용 가능한 할인 항목이 없습니다.</span>'}
-                            <label><input type="checkbox"> ${profile.performanceNote}</label>
-                            <label><input type="checkbox"> 카드사 앱/명세서에서 실적 제외 항목 최종 확인</label>
+                            <label><input type="checkbox"> 카드사 상품설명서에서 실적 제외 항목 최종 확인</label>
+                            <label><input type="checkbox"> 자동납부/간편결제/무이자할부 경로가 할인·실적 대상인지 확인</label>
+                            <label><input type="checkbox"> ${profile.performanceNote || estimate.performance?.note || '카드별 전월실적 산정 기준 확인 필요'}</label>
                         </div>
                     </div>
                 `;
