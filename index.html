@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -1443,6 +1443,38 @@
             line-height: 1.25;
         }
 
+        .calendar-day-list {
+            display: grid;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        .calendar-day-txn {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 4px;
+            align-items: center;
+            padding: 3px 5px;
+            border: 1px solid #E5E7EB;
+            border-radius: 5px;
+            background: #FFFFFF;
+            font-size: 10.5px;
+            line-height: 1.2;
+            min-width: 0;
+        }
+
+        .calendar-day-txn span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+        .calendar-day-txn strong {
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
         .calendar-side-panel {
             display: grid;
             gap: 14px;
@@ -1571,6 +1603,77 @@
             font-variant-numeric: tabular-nums;
         }
 
+        .category-detail-stack,
+        .discount-detail-stack {
+            display: grid;
+            gap: 8px;
+        }
+
+        .category-detail-row {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            background: var(--surface-soft);
+        }
+
+        .category-detail-head,
+        .discount-detail-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: baseline;
+        }
+
+        .category-detail-dates {
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .discount-detail-row {
+            padding: 6px 0;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+        }
+
+        .discount-detail-row span {
+            color: var(--muted);
+        }
+
+        .event-rank-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 10px;
+            margin: 14px 0 18px;
+        }
+
+        .event-rank-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            background: var(--surface-soft);
+            display: grid;
+            gap: 8px;
+        }
+
+        .event-rank-card.top {
+            border-color: var(--success);
+            background: #F0FDF4;
+        }
+
+        .event-rank-title {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: start;
+        }
+
+        .event-rank-title strong {
+            font-size: 14px;
+            line-height: 1.3;
+        }
+
         .installment-status {
             display: inline-flex;
             align-items: center;
@@ -1602,7 +1705,7 @@
             }
 
             .calendar-side-panel {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
             .category-grid {
@@ -1622,12 +1725,16 @@
             }
 
             .calendar-day {
-                min-height: 78px;
+                min-height: 86px;
                 padding: 6px;
             }
 
             .calendar-side-panel {
                 grid-template-columns: 1fr;
+            }
+
+            .event-rank-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
 
@@ -1660,8 +1767,13 @@
             }
 
             .tab-content {
-                padding: 16px 12px;
+                padding: 14px 10px;
                 border-radius: 10px;
+            }
+
+            .table-wrap {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .calendar-summary-grid,
@@ -1687,24 +1799,54 @@
             }
 
             .calendar-day {
-                min-height: 64px;
-                padding: 5px;
+                min-height: 78px;
+                padding: 4px;
                 gap: 3px;
             }
 
             .calendar-day-amount {
-                font-size: 11px;
+                font-size: 10.5px;
                 overflow-wrap: anywhere;
             }
 
             .calendar-day-meta {
-                font-size: 10px;
+                font-size: 9.5px;
+            }
+
+            .calendar-day-list {
+                gap: 2px;
+            }
+
+            .calendar-day-txn {
+                grid-template-columns: 1fr;
+                gap: 1px;
+                padding: 2px 3px;
+                font-size: 9.5px;
             }
 
             .calendar-breakdown,
             .workflow-panel,
             .usage-visual-panel {
-                padding: 12px;
+                padding: 10px;
+            }
+
+            .event-rank-grid,
+            .benefit-filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .event-rank-card,
+            .benefit-filter-card,
+            .card-item {
+                padding: 10px;
+            }
+
+            .discount-detail-row,
+            .category-detail-head,
+            .event-rank-title {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 4px;
             }
 
             .usage-rank-row {
@@ -2105,11 +2247,20 @@
 
             <h3 class="subsection-title">자동납부·고정 결제처</h3>
             <p class="source-note" id="fixedExpenseSummary">고정지출로 확정할 결제처를 체크하면 해당 카드의 고정지출 실적·혜택 예상에 반영됩니다.</p>
+            <div class="button-group" style="justify-content: space-between; align-items: center; margin: 12px 0;">
+                <label style="display:flex; align-items:center; gap:8px; margin:0;">
+                    <input type="checkbox" id="showUnconfirmedFixedRows" onchange="toggleUnconfirmedFixedRows(this.checked)">
+                    미확정 후보까지 보기
+                </label>
+                <span class="source-note" id="fixedVisibilitySummary" style="margin:0;">확정된 고정비만 표시 중입니다.</span>
+            </div>
+            <div id="fixedCategorySummary"></div>
             <div class="table-wrap">
                 <table class="comparison-table">
                     <thead>
                         <tr>
                             <th>고정확정</th>
+                            <th>분류</th>
                             <th>결제처</th>
                             <th>현재 카드</th>
                             <th>월 금액</th>
@@ -2120,6 +2271,7 @@
                     <tbody id="ownedPaymentTable"></tbody>
                 </table>
             </div>
+            <div id="fixedBackDataSummary"></div>
         </div>
 
         <!-- TAB 4: 카드 혜택 비교 -->
@@ -2199,6 +2351,16 @@
                     </div>
                 </div>
             </div>
+            <div class="benefit-filter-panel">
+                <div class="benefit-filter-header">
+                    <div>
+                        <h3>보고 싶은 카드 직접 선택</h3>
+                        <span class="source-note" id="scenarioPickerSummary">카드를 최대 3장까지 선택하면 선택 조합의 예상 혜택을 먼저 보여줍니다.</span>
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="clearScenarioCardSelection()">선택 초기화</button>
+                </div>
+                <div id="scenarioCardPicker" class="benefit-filter-grid"></div>
+            </div>
             <div id="comboResults" class="card-grid"></div>
             <div id="emptyCombo" class="empty-state">
                 <div class="empty-state-icon">🔗</div>
@@ -2223,6 +2385,7 @@
             <p style="color: #6B7280; margin-bottom: 20px;">이벤트 추천카드의 실질 혜택, 할인구간, 할인항목, 실적, 연회비를 한 페이지 표로 비교합니다.</p>
 
             <div class="calendar-summary-grid" id="eventCompareSummary"></div>
+            <div id="eventRankCards" class="event-rank-grid"></div>
             <div class="table-wrap">
                 <table class="comparison-table">
                     <thead>
@@ -2802,773 +2965,1542 @@
         let lastBestCombo = null;
         let pendingImportedRows = [];
         let selectedBenefitCategories = ['all'];
-        const importedCardUsagePreset = {        
-                    "id": "card-usage-20260615-v4",        
-                    "appliedLabel": "우리카드/삼성카드/네이버 현대카드 사용내역 2025.07~2026.06",        
-                    "period": {        
-                                "start": "2025-07-06",        
-                                "end": "2026-06-15",        
-                                "months": [        
-                                            "2025-07",        
-                                            "2025-08",        
-                                            "2025-09",        
-                                            "2025-10",        
-                                            "2025-11",        
-                                            "2025-12",        
-                                            "2026-01",        
-                                            "2026-02",        
-                                            "2026-03",        
-                                            "2026-04",        
-                                            "2026-05",        
-                                            "2026-06"        
-                                ],        
-                                "monthCount": 12        
-                    },        
-                    "transactionCount": 321,        
-                    "totalAmount": 12614100,        
-                    "monthlyAverageByCategory": {        
-                                "주거": 0,        
-                                "공과금": 125495,        
-                                "통신": 11803,        
-                                "보험": 130856,        
-                                "구독": 0,        
-                                "대중교통": 16157,        
-                                "택시": 392,        
-                                "주유": 2500,        
-                                "마트": 41605,        
-                                "외식": 43492,        
-                                "배달": 15800,        
-                                "카페": 24008,        
-                                "온라인쇼핑": 443976,        
-                                "편의점": 4584,        
-                                "대형마트": 0,        
-                                "의료": 26035,        
-                                "미용스포츠": 62383,        
-                                "교육": 0,        
-                                "영화문화": 0,        
-                                "기타": 102090        
-                    },        
-                    "totalByCard": {        
-                                "삼성카드(탭탭오)": 8777602,        
-                                "우리카드 DA@카드의정석": 1378570,        
-                                "네이버 현대카드": 2457928        
-                    },        
-                    "monthlyTotal": {        
-                                "2025-07": 430967,        
-                                "2025-08": 806697,        
-                                "2025-09": 338922,        
-                                "2025-10": 307707,        
-                                "2025-11": 306517,        
-                                "2025-12": 424997,        
-                                "2026-01": 629447,        
-                                "2026-02": 1608737,        
-                                "2026-03": 4200767,        
-                                "2026-04": 734827,        
-                                "2026-05": 1447735,        
-                                "2026-06": 1376780        
-                    },        
-                    "monthlyByCard": {        
-                                "2025-07": {        
-                                            "삼성카드(탭탭오)": 430967        
-                                },        
-                                "2025-08": {        
-                                            "삼성카드(탭탭오)": 806697        
-                                },        
-                                "2025-09": {        
-                                            "삼성카드(탭탭오)": 338922        
-                                },        
-                                "2025-10": {        
-                                            "삼성카드(탭탭오)": 307707        
-                                },        
-                                "2025-11": {        
-                                            "삼성카드(탭탭오)": 306517        
-                                },        
-                                "2025-12": {        
-                                            "삼성카드(탭탭오)": 424997        
-                                },        
-                                "2026-01": {        
-                                            "삼성카드(탭탭오)": 497517,        
-                                            "우리카드 DA@카드의정석": 131930        
-                                },        
-                                "2026-02": {        
-                                            "네이버 현대카드": 872720,        
-                                            "삼성카드(탭탭오)": 660487,        
-                                            "우리카드 DA@카드의정석": 75530        
-                                },        
-                                "2026-03": {        
-                                            "네이버 현대카드": 814720,        
-                                            "삼성카드(탭탭오)": 2961277,        
-                                            "우리카드 DA@카드의정석": 424770        
-                                },        
-                                "2026-04": {        
-                                            "삼성카드(탭탭오)": 516217,        
-                                            "우리카드 DA@카드의정석": 218610        
-                                },        
-                                "2026-05": {        
-                                            "네이버 현대카드": 519028,        
-                                            "삼성카드(탭탭오)": 454077,        
-                                            "우리카드 DA@카드의정석": 474630        
-                                },        
-                                "2026-06": {        
-                                            "네이버 현대카드": 251460,        
-                                            "삼성카드(탭탭오)": 1072220,        
-                                            "우리카드 DA@카드의정석": 53100        
-                                }        
-                    },        
-                    "monthlyByCategory": {        
-                                "2025-07": {        
-                                            "공과금": 68570,        
-                                            "기타": 29700,        
-                                            "마트": 56900,        
-                                            "보험": 146297,        
-                                            "온라인쇼핑": 94180,        
-                                            "통신": 31900,        
-                                            "편의점": 3420        
-                                },        
-                                "2025-08": {        
-                                            "공과금": 67250,        
-                                            "기타": 300,        
-                                            "보험": 146297,        
-                                            "온라인쇼핑": 538860,        
-                                            "카페": 22090,        
-                                            "통신": 31900        
-                                },        
-                                "2025-09": {        
-                                            "공과금": 61950,        
-                                            "기타": 300,        
-                                            "보험": 146297,        
-                                            "온라인쇼핑": 123075,        
-                                            "카페": 7300        
-                                },        
-                                "2025-10": {        
-                                            "공과금": 52690,        
-                                            "기타": 16400,        
-                                            "보험": 146297,        
-                                            "온라인쇼핑": 92320        
-                                },        
-                                "2025-11": {        
-                                            "공과금": 63600,        
-                                            "기타": 300,        
-                                            "미용스포츠": 40750,        
-                                            "보험": 146297,        
-                                            "온라인쇼핑": 55570        
-                                },        
-                                "2025-12": {        
-                                            "공과금": 144180,        
-                                            "기타": 300,        
-                                            "보험": 146297,        
-                                            "온라인쇼핑": 59320,        
-                                            "외식": 53100,        
-                                            "카페": 9000,        
-                                            "편의점": 12800        
-                                },        
-                                "2026-01": {        
-                                            "공과금": 197850,        
-                                            "기타": 154800,        
-                                            "마트": 83680,        
-                                            "미용스포츠": 6950,        
-                                            "보험": 107297,        
-                                            "온라인쇼핑": 31570,        
-                                            "외식": 9500,        
-                                            "카페": 37800        
-                                },        
-                                "2026-02": {        
-                                            "공과금": 267790,        
-                                            "기타": 483700,        
-                                            "대중교통": 30000,        
-                                            "마트": 63393,        
-                                            "미용스포츠": 286200,        
-                                            "보험": 146297,        
-                                            "온라인쇼핑": 235447,        
-                                            "외식": 42500,        
-                                            "카페": 45800,        
-                                            "편의점": 7610        
-                                },        
-                                "2026-03": {        
-                                            "공과금": 230970,        
-                                            "기타": 395445,        
-                                            "대중교통": 65170,        
-                                            "마트": 121272,        
-                                            "배달": 49034,        
-                                            "보험": 146297,        
-                                            "온라인쇼핑": 2857479,        
-                                            "외식": 100100,        
-                                            "의료": 187600,        
-                                            "카페": 43100,        
-                                            "편의점": 4300        
-                                },        
-                                "2026-04": {        
-                                            "공과금": 154520,        
-                                            "기타": 28300,        
-                                            "대중교통": 1550,        
-                                            "마트": 34940,        
-                                            "미용스포츠": 205600,        
-                                            "보험": 146297,        
-                                            "온라인쇼핑": 3300,        
-                                            "외식": 70200,        
-                                            "의료": 42120,        
-                                            "카페": 48000        
-                                },        
-                                "2026-05": {        
-                                            "공과금": 115580,        
-                                            "기타": 37300,        
-                                            "대중교통": 97163,        
-                                            "마트": 92350,        
-                                            "미용스포츠": 89600,        
-                                            "배달": 76968,        
-                                            "보험": 146297,        
-                                            "온라인쇼핑": 329157,        
-                                            "외식": 228000,        
-                                            "의료": 82700,        
-                                            "주유": 30000,        
-                                            "카페": 38500,        
-                                            "택시": 4700,        
-                                            "통신": 52540,        
-                                            "편의점": 26880        
-                                },        
-                                "2026-06": {        
-                                            "공과금": 80990,        
-                                            "기타": 78230,        
-                                            "마트": 46730,        
-                                            "미용스포츠": 119500,        
-                                            "배달": 63600,        
-                                            "온라인쇼핑": 907430,        
-                                            "외식": 18500,        
-                                            "카페": 36500,        
-                                            "통신": 25300        
-                                }        
-                    },        
-                    "monthlyByCardCategory": {        
-                                "2025-07": {        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 68570,        
-                                                        "기타": 29700,        
-                                                        "마트": 56900,        
-                                                        "보험": 146297,        
-                                                        "온라인쇼핑": 94180,        
-                                                        "통신": 31900,        
-                                                        "편의점": 3420        
-                                            }        
-                                },        
-                                "2025-08": {        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 67250,        
-                                                        "기타": 300,        
-                                                        "보험": 146297,        
-                                                        "온라인쇼핑": 538860,        
-                                                        "카페": 22090,        
-                                                        "통신": 31900        
-                                            }        
-                                },        
-                                "2025-09": {        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 61950,        
-                                                        "기타": 300,        
-                                                        "보험": 146297,        
-                                                        "온라인쇼핑": 123075,        
-                                                        "카페": 7300        
-                                            }        
-                                },        
-                                "2025-10": {        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 52690,        
-                                                        "기타": 16400,        
-                                                        "보험": 146297,        
-                                                        "온라인쇼핑": 92320        
-                                            }        
-                                },        
-                                "2025-11": {        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 63600,        
-                                                        "기타": 300,        
-                                                        "미용스포츠": 40750,        
-                                                        "보험": 146297,        
-                                                        "온라인쇼핑": 55570        
-                                            }        
-                                },        
-                                "2025-12": {        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 144180,        
-                                                        "기타": 300,        
-                                                        "보험": 146297,        
-                                                        "온라인쇼핑": 59320,        
-                                                        "외식": 53100,        
-                                                        "카페": 9000,        
-                                                        "편의점": 12800        
-                                            }        
-                                },        
-                                "2026-01": {        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 197850,        
-                                                        "기타": 122800,        
-                                                        "보험": 107297,        
-                                                        "온라인쇼핑": 28270,        
-                                                        "외식": 9500,        
-                                                        "카페": 31800        
-                                            },        
-                                            "우리카드 DA@카드의정석": {        
-                                                        "기타": 32000,        
-                                                        "마트": 83680,        
-                                                        "미용스포츠": 6950,        
-                                                        "온라인쇼핑": 3300,        
-                                                        "카페": 6000        
-                                            }        
-                                },        
-                                "2026-02": {        
-                                            "네이버 현대카드": {        
-                                                        "기타": 447700,        
-                                                        "대중교통": 30000,        
-                                                        "마트": 63393,        
-                                                        "미용스포츠": 77000,        
-                                                        "온라인쇼핑": 163117,        
-                                                        "외식": 42500,        
-                                                        "카페": 41400,        
-                                                        "편의점": 7610        
-                                            },        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 267790,        
-                                                        "기타": 36000,        
-                                                        "미용스포츠": 209200,        
-                                                        "보험": 146297,        
-                                                        "카페": 1200        
-                                            },        
-                                            "우리카드 DA@카드의정석": {        
-                                                        "온라인쇼핑": 72330,        
-                                                        "카페": 3200        
-                                            }        
-                                },        
-                                "2026-03": {        
-                                            "네이버 현대카드": {        
-                                                        "기타": 36145,        
-                                                        "대중교통": 30000,        
-                                                        "마트": 121272,        
-                                                        "배달": 49034,        
-                                                        "온라인쇼핑": 341169,        
-                                                        "외식": 29500,        
-                                                        "의료": 187600,        
-                                                        "카페": 18200,        
-                                                        "편의점": 1800        
-                                            },        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 230970,        
-                                                        "기타": 300,        
-                                                        "보험": 146297,        
-                                                        "온라인쇼핑": 2513010,        
-                                                        "외식": 49000,        
-                                                        "카페": 21700        
-                                            },        
-                                            "우리카드 DA@카드의정석": {        
-                                                        "기타": 359000,        
-                                                        "대중교통": 35170,        
-                                                        "온라인쇼핑": 3300,        
-                                                        "외식": 21600,        
-                                                        "카페": 3200,        
-                                                        "편의점": 2500        
-                                            }        
-                                },        
-                                "2026-04": {        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 154520,        
-                                                        "기타": 300,        
-                                                        "미용스포츠": 205600,        
-                                                        "보험": 146297,        
-                                                        "외식": 9500        
-                                            },        
-                                            "우리카드 DA@카드의정석": {        
-                                                        "기타": 28000,        
-                                                        "대중교통": 1550,        
-                                                        "마트": 34940,        
-                                                        "온라인쇼핑": 3300,        
-                                                        "외식": 60700,        
-                                                        "의료": 42120,        
-                                                        "카페": 48000        
-                                            }        
-                                },        
-                                "2026-05": {        
-                                            "네이버 현대카드": {        
-                                                        "대중교통": 42163,        
-                                                        "마트": 61630,        
-                                                        "배달": 76968,        
-                                                        "온라인쇼핑": 247547,        
-                                                        "외식": 28000,        
-                                                        "택시": 4700,        
-                                                        "통신": 36540,        
-                                                        "편의점": 21480        
-                                            },        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 115580,        
-                                                        "기타": 300,        
-                                                        "대중교통": 55000,        
-                                                        "미용스포츠": 89600,        
-                                                        "보험": 146297,        
-                                                        "온라인쇼핑": 28100,        
-                                                        "카페": 3200,        
-                                                        "통신": 16000        
-                                            },        
-                                            "우리카드 DA@카드의정석": {        
-                                                        "기타": 37000,        
-                                                        "마트": 30720,        
-                                                        "온라인쇼핑": 53510,        
-                                                        "외식": 200000,        
-                                                        "의료": 82700,        
-                                                        "주유": 30000,        
-                                                        "카페": 35300,        
-                                                        "편의점": 5400        
-                                            }        
-                                },        
-                                "2026-06": {        
-                                            "네이버 현대카드": {        
-                                                        "기타": 73230,        
-                                                        "마트": 46730,        
-                                                        "배달": 63600,        
-                                                        "온라인쇼핑": 32400,        
-                                                        "카페": 10200,        
-                                                        "통신": 25300        
-                                            },        
-                                            "삼성카드(탭탭오)": {        
-                                                        "공과금": 80990,        
-                                                        "미용스포츠": 119500,        
-                                                        "온라인쇼핑": 871730        
-                                            },        
-                                            "우리카드 DA@카드의정석": {        
-                                                        "기타": 5000,        
-                                                        "온라인쇼핑": 3300,        
-                                                        "외식": 18500,        
-                                                        "카페": 26300        
-                                            }        
-                                }        
-                    },        
-                    "customMerchants": [        
-                                {        
-                                            "id": "usage_온라인쇼핑_0",        
-                                            "name": "주식회사 지마켓",        
-                                            "topInput": "onlineShopping",        
-                                            "amount": 206631,        
-                                            "checked": true,        
-                                            "currentCard": "삼성카드(탭탭오)"        
-                                },        
-                                {        
-                                            "id": "usage_온라인쇼핑_1",        
-                                            "name": "쿠팡",        
-                                            "topInput": "onlineShopping",        
-                                            "amount": 79952,        
-                                            "checked": true,        
-                                            "currentCard": "삼성카드(탭탭오)"        
-                                },        
-                                {        
-                                            "id": "usage_보험_2",        
-                                            "name": "(주)케이비손해보험",        
-                                            "topInput": "insurance",        
-                                            "amount": 77676,        
-                                            "checked": true,        
-                                            "currentCard": "삼성카드(탭탭오)"        
-                                },        
-                                {        
-                                            "id": "usage_공과금_3",        
-                                            "name": "서울도시가스(주)_자동이체",        
-                                            "topInput": "utilities",        
-                                            "amount": 73305,        
-                                            "checked": true,        
-                                            "currentCard": "삼성카드(탭탭오)"        
-                                },        
-                                {        
-                                            "id": "usage_온라인쇼핑_4",        
-                                            "name": "네이버페이 네이버",        
-                                            "topInput": "onlineShopping",        
-                                            "amount": 72644,        
-                                            "checked": true,        
-                                            "currentCard": "삼성카드(탭탭오)"        
-                                },        
-                                {        
-                                            "id": "usage_보험_5",        
-                                            "name": "농협손해보험",        
-                                            "topInput": "insurance",        
-                                            "amount": 53180,        
-                                            "checked": true,        
-                                            "currentCard": "삼성카드(탭탭오)"        
-                                },        
-                                {        
-                                            "id": "usage_온라인쇼핑_6",        
-                                            "name": "네이버페이",        
-                                            "topInput": "onlineShopping",        
-                                            "amount": 51992,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_미용스포츠_7",        
-                                            "name": "에프알엘코리아(주)",        
-                                            "topInput": "beautySports",        
-                                            "amount": 35700,        
-                                            "checked": true,        
-                                            "currentCard": "삼성카드(탭탭오)"        
-                                },        
-                                {        
-                                            "id": "usage_기타_8",        
-                                            "name": "（주）지엔에프",        
-                                            "topInput": "others",        
-                                            "amount": 29917,        
-                                            "checked": true,        
-                                            "currentCard": "우리카드 DA@카드의정석"        
-                                },        
-                                {        
-                                            "id": "usage_미용스포츠_9",        
-                                            "name": "에프알엘코리아 주식회사",        
-                                            "topInput": "beautySports",        
-                                            "amount": 14942,        
-                                            "checked": true,        
-                                            "currentCard": "삼성카드(탭탭오)"        
-                                },        
-                                {        
-                                            "id": "usage_기타_10",        
-                                            "name": "파주연천축협한우마을",        
-                                            "topInput": "others",        
-                                            "amount": 12896,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_마트_11",        
-                                            "name": "네이버파이낸셜(주) - 주식회사 컬리페이",        
-                                            "topInput": "grocery",        
-                                            "amount": 12443,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_기타_12",        
-                                            "name": "무인양품합정점",        
-                                            "topInput": "others",        
-                                            "amount": 11785,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_온라인쇼핑_13",        
-                                            "name": "쿠팡",        
-                                            "topInput": "onlineShopping",        
-                                            "amount": 9937,        
-                                            "checked": true,        
-                                            "currentCard": "우리카드 DA@카드의정석"        
-                                },        
-                                {        
-                                            "id": "usage_의료_14",        
-                                            "name": "연세다온산부인과의원",        
-                                            "topInput": "medical",        
-                                            "amount": 9875,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_마트_15",        
-                                            "name": "윈플러스마트서부마포점",        
-                                            "topInput": "grocery",        
-                                            "amount": 8906,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_기타_16",        
-                                            "name": "레이몬드홍대점",        
-                                            "topInput": "others",        
-                                            "amount": 7200,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_카페_17",        
-                                            "name": "커피데이즈 합정역점",        
-                                            "topInput": "cafe",        
-                                            "amount": 7017,        
-                                            "checked": true,        
-                                            "currentCard": "우리카드 DA@카드의정석"        
-                                },        
-                                {        
-                                            "id": "usage_외식_18",        
-                                            "name": "우물집",        
-                                            "topInput": "dining",        
-                                            "amount": 6875,        
-                                            "checked": true,        
-                                            "currentCard": "우리카드 DA@카드의정석"        
-                                },        
-                                {        
-                                            "id": "usage_마트_19",        
-                                            "name": "주식회사 윈플러스마",        
-                                            "topInput": "grocery",        
-                                            "amount": 6741,        
-                                            "checked": true,        
-                                            "currentCard": "우리카드 DA@카드의정석"        
-                                },        
-                                {        
-                                            "id": "usage_배달_20",        
-                                            "name": "우아한형제들",        
-                                            "topInput": "delivery",        
-                                            "amount": 6633,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_의료_21",        
-                                            "name": "메디킹덤약국",        
-                                            "topInput": "medical",        
-                                            "amount": 6558,        
-                                            "checked": true,        
-                                            "currentCard": "우리카드 DA@카드의정석"        
-                                },        
-                                {        
-                                            "id": "usage_미용스포츠_22",        
-                                            "name": "(주)섹타나인 - 주식회사 코페이",        
-                                            "topInput": "beautySports",        
-                                            "amount": 6417,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_의료_23",        
-                                            "name": "삼성바른내과의원",        
-                                            "topInput": "medical",        
-                                            "amount": 5467,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_통신_24",        
-                                            "name": "한국정보통신 - 쿠팡",        
-                                            "topInput": "telecom",        
-                                            "amount": 5153,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_온라인쇼핑_25",        
-                                            "name": "토스페이먼츠주식회사 - (주)비바리퍼블리",        
-                                            "topInput": "onlineShopping",        
-                                            "amount": 5084,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_마트_26",        
-                                            "name": "주식회사 아성다이소",        
-                                            "topInput": "grocery",        
-                                            "amount": 5038,        
-                                            "checked": true,        
-                                            "currentCard": "우리카드 DA@카드의정석"        
-                                },        
-                                {        
-                                            "id": "usage_대중교통_27",        
-                                            "name": "모바일티머니선불형",        
-                                            "topInput": "transit",        
-                                            "amount": 5000,        
-                                            "checked": true,        
-                                            "currentCard": "네이버 현대카드"        
-                                },        
-                                {        
-                                            "id": "usage_공과금_etc",        
-                                            "name": "공과금 기타 사용처",        
-                                            "topInput": "utilities",        
-                                            "amount": 52190,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_통신_etc",        
-                                            "name": "통신 기타 사용처",        
-                                            "topInput": "telecom",        
-                                            "amount": 6650,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_대중교통_etc",        
-                                            "name": "대중교통 기타 사용처",        
-                                            "topInput": "transit",        
-                                            "amount": 11157,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_주유_etc",        
-                                            "name": "주유 기타 사용처",        
-                                            "topInput": "fuel",        
-                                            "amount": 2500,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_마트_etc",        
-                                            "name": "마트 기타 사용처",        
-                                            "topInput": "grocery",        
-                                            "amount": 8477,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_외식_etc",        
-                                            "name": "외식 기타 사용처",        
-                                            "topInput": "dining",        
-                                            "amount": 36617,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_배달_etc",        
-                                            "name": "배달 기타 사용처",        
-                                            "topInput": "delivery",        
-                                            "amount": 9167,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_카페_etc",        
-                                            "name": "카페 기타 사용처",        
-                                            "topInput": "cafe",        
-                                            "amount": 16991,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_온라인쇼핑_etc",        
-                                            "name": "온라인쇼핑 기타 사용처",        
-                                            "topInput": "onlineShopping",        
-                                            "amount": 17736,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_편의점_etc",        
-                                            "name": "편의점 기타 사용처",        
-                                            "topInput": "convenience",        
-                                            "amount": 4584,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_의료_etc",        
-                                            "name": "의료 기타 사용처",        
-                                            "topInput": "medical",        
-                                            "amount": 4135,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_미용스포츠_etc",        
-                                            "name": "미용스포츠 기타 사용처",        
-                                            "topInput": "beautySports",        
-                                            "amount": 5324,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                },        
-                                {        
-                                            "id": "usage_기타_etc",        
-                                            "name": "기타 기타 사용처",        
-                                            "topInput": "others",        
-                                            "amount": 40292,        
-                                            "checked": true,        
-                                            "currentCard": null        
-                                }        
-                    ]        
-        };        
+        let selectedScenarioCardIds = [];
+        let showUnconfirmedFixedRows = false;
+        const importedCardUsagePreset = {
+        
+                    "id": "card-usage-20260615-v4",
+        
+                    "appliedLabel": "우리카드/삼성카드/네이버 현대카드 사용내역 2025.07~2026.06",
+        
+                    "period": {
+        
+                                "start": "2025-07-06",
+        
+                                "end": "2026-06-15",
+        
+                                "months": [
+        
+                                            "2025-07",
+        
+                                            "2025-08",
+        
+                                            "2025-09",
+        
+                                            "2025-10",
+        
+                                            "2025-11",
+        
+                                            "2025-12",
+        
+                                            "2026-01",
+        
+                                            "2026-02",
+        
+                                            "2026-03",
+        
+                                            "2026-04",
+        
+                                            "2026-05",
+        
+                                            "2026-06"
+        
+                                ],
+        
+                                "monthCount": 12
+        
+                    },
+        
+                    "transactionCount": 321,
+        
+                    "totalAmount": 12614100,
+        
+                    "monthlyAverageByCategory": {
+        
+                                "주거": 0,
+        
+                                "공과금": 125495,
+        
+                                "통신": 11803,
+        
+                                "보험": 130856,
+        
+                                "구독": 0,
+        
+                                "대중교통": 16157,
+        
+                                "택시": 392,
+        
+                                "주유": 2500,
+        
+                                "마트": 41605,
+        
+                                "외식": 43492,
+        
+                                "배달": 15800,
+        
+                                "카페": 24008,
+        
+                                "온라인쇼핑": 443976,
+        
+                                "편의점": 4584,
+        
+                                "대형마트": 0,
+        
+                                "의료": 26035,
+        
+                                "미용스포츠": 62383,
+        
+                                "교육": 0,
+        
+                                "영화문화": 0,
+        
+                                "기타": 102090
+        
+                    },
+        
+                    "totalByCard": {
+        
+                                "삼성카드(탭탭오)": 8777602,
+        
+                                "우리카드 DA@카드의정석": 1378570,
+        
+                                "네이버 현대카드": 2457928
+        
+                    },
+        
+                    "monthlyTotal": {
+        
+                                "2025-07": 430967,
+        
+                                "2025-08": 806697,
+        
+                                "2025-09": 338922,
+        
+                                "2025-10": 307707,
+        
+                                "2025-11": 306517,
+        
+                                "2025-12": 424997,
+        
+                                "2026-01": 629447,
+        
+                                "2026-02": 1608737,
+        
+                                "2026-03": 4200767,
+        
+                                "2026-04": 734827,
+        
+                                "2026-05": 1447735,
+        
+                                "2026-06": 1376780
+        
+                    },
+        
+                    "monthlyByCard": {
+        
+                                "2025-07": {
+        
+                                            "삼성카드(탭탭오)": 430967
+        
+                                },
+        
+                                "2025-08": {
+        
+                                            "삼성카드(탭탭오)": 806697
+        
+                                },
+        
+                                "2025-09": {
+        
+                                            "삼성카드(탭탭오)": 338922
+        
+                                },
+        
+                                "2025-10": {
+        
+                                            "삼성카드(탭탭오)": 307707
+        
+                                },
+        
+                                "2025-11": {
+        
+                                            "삼성카드(탭탭오)": 306517
+        
+                                },
+        
+                                "2025-12": {
+        
+                                            "삼성카드(탭탭오)": 424997
+        
+                                },
+        
+                                "2026-01": {
+        
+                                            "삼성카드(탭탭오)": 497517,
+        
+                                            "우리카드 DA@카드의정석": 131930
+        
+                                },
+        
+                                "2026-02": {
+        
+                                            "네이버 현대카드": 872720,
+        
+                                            "삼성카드(탭탭오)": 660487,
+        
+                                            "우리카드 DA@카드의정석": 75530
+        
+                                },
+        
+                                "2026-03": {
+        
+                                            "네이버 현대카드": 814720,
+        
+                                            "삼성카드(탭탭오)": 2961277,
+        
+                                            "우리카드 DA@카드의정석": 424770
+        
+                                },
+        
+                                "2026-04": {
+        
+                                            "삼성카드(탭탭오)": 516217,
+        
+                                            "우리카드 DA@카드의정석": 218610
+        
+                                },
+        
+                                "2026-05": {
+        
+                                            "네이버 현대카드": 519028,
+        
+                                            "삼성카드(탭탭오)": 454077,
+        
+                                            "우리카드 DA@카드의정석": 474630
+        
+                                },
+        
+                                "2026-06": {
+        
+                                            "네이버 현대카드": 251460,
+        
+                                            "삼성카드(탭탭오)": 1072220,
+        
+                                            "우리카드 DA@카드의정석": 53100
+        
+                                }
+        
+                    },
+        
+                    "monthlyByCategory": {
+        
+                                "2025-07": {
+        
+                                            "공과금": 68570,
+        
+                                            "기타": 29700,
+        
+                                            "마트": 56900,
+        
+                                            "보험": 146297,
+        
+                                            "온라인쇼핑": 94180,
+        
+                                            "통신": 31900,
+        
+                                            "편의점": 3420
+        
+                                },
+        
+                                "2025-08": {
+        
+                                            "공과금": 67250,
+        
+                                            "기타": 300,
+        
+                                            "보험": 146297,
+        
+                                            "온라인쇼핑": 538860,
+        
+                                            "카페": 22090,
+        
+                                            "통신": 31900
+        
+                                },
+        
+                                "2025-09": {
+        
+                                            "공과금": 61950,
+        
+                                            "기타": 300,
+        
+                                            "보험": 146297,
+        
+                                            "온라인쇼핑": 123075,
+        
+                                            "카페": 7300
+        
+                                },
+        
+                                "2025-10": {
+        
+                                            "공과금": 52690,
+        
+                                            "기타": 16400,
+        
+                                            "보험": 146297,
+        
+                                            "온라인쇼핑": 92320
+        
+                                },
+        
+                                "2025-11": {
+        
+                                            "공과금": 63600,
+        
+                                            "기타": 300,
+        
+                                            "미용스포츠": 40750,
+        
+                                            "보험": 146297,
+        
+                                            "온라인쇼핑": 55570
+        
+                                },
+        
+                                "2025-12": {
+        
+                                            "공과금": 144180,
+        
+                                            "기타": 300,
+        
+                                            "보험": 146297,
+        
+                                            "온라인쇼핑": 59320,
+        
+                                            "외식": 53100,
+        
+                                            "카페": 9000,
+        
+                                            "편의점": 12800
+        
+                                },
+        
+                                "2026-01": {
+        
+                                            "공과금": 197850,
+        
+                                            "기타": 154800,
+        
+                                            "마트": 83680,
+        
+                                            "미용스포츠": 6950,
+        
+                                            "보험": 107297,
+        
+                                            "온라인쇼핑": 31570,
+        
+                                            "외식": 9500,
+        
+                                            "카페": 37800
+        
+                                },
+        
+                                "2026-02": {
+        
+                                            "공과금": 267790,
+        
+                                            "기타": 483700,
+        
+                                            "대중교통": 30000,
+        
+                                            "마트": 63393,
+        
+                                            "미용스포츠": 286200,
+        
+                                            "보험": 146297,
+        
+                                            "온라인쇼핑": 235447,
+        
+                                            "외식": 42500,
+        
+                                            "카페": 45800,
+        
+                                            "편의점": 7610
+        
+                                },
+        
+                                "2026-03": {
+        
+                                            "공과금": 230970,
+        
+                                            "기타": 395445,
+        
+                                            "대중교통": 65170,
+        
+                                            "마트": 121272,
+        
+                                            "배달": 49034,
+        
+                                            "보험": 146297,
+        
+                                            "온라인쇼핑": 2857479,
+        
+                                            "외식": 100100,
+        
+                                            "의료": 187600,
+        
+                                            "카페": 43100,
+        
+                                            "편의점": 4300
+        
+                                },
+        
+                                "2026-04": {
+        
+                                            "공과금": 154520,
+        
+                                            "기타": 28300,
+        
+                                            "대중교통": 1550,
+        
+                                            "마트": 34940,
+        
+                                            "미용스포츠": 205600,
+        
+                                            "보험": 146297,
+        
+                                            "온라인쇼핑": 3300,
+        
+                                            "외식": 70200,
+        
+                                            "의료": 42120,
+        
+                                            "카페": 48000
+        
+                                },
+        
+                                "2026-05": {
+        
+                                            "공과금": 115580,
+        
+                                            "기타": 37300,
+        
+                                            "대중교통": 97163,
+        
+                                            "마트": 92350,
+        
+                                            "미용스포츠": 89600,
+        
+                                            "배달": 76968,
+        
+                                            "보험": 146297,
+        
+                                            "온라인쇼핑": 329157,
+        
+                                            "외식": 228000,
+        
+                                            "의료": 82700,
+        
+                                            "주유": 30000,
+        
+                                            "카페": 38500,
+        
+                                            "택시": 4700,
+        
+                                            "통신": 52540,
+        
+                                            "편의점": 26880
+        
+                                },
+        
+                                "2026-06": {
+        
+                                            "공과금": 80990,
+        
+                                            "기타": 78230,
+        
+                                            "마트": 46730,
+        
+                                            "미용스포츠": 119500,
+        
+                                            "배달": 63600,
+        
+                                            "온라인쇼핑": 907430,
+        
+                                            "외식": 18500,
+        
+                                            "카페": 36500,
+        
+                                            "통신": 25300
+        
+                                }
+        
+                    },
+        
+                    "monthlyByCardCategory": {
+        
+                                "2025-07": {
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 68570,
+        
+                                                        "기타": 29700,
+        
+                                                        "마트": 56900,
+        
+                                                        "보험": 146297,
+        
+                                                        "온라인쇼핑": 94180,
+        
+                                                        "통신": 31900,
+        
+                                                        "편의점": 3420
+        
+                                            }
+        
+                                },
+        
+                                "2025-08": {
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 67250,
+        
+                                                        "기타": 300,
+        
+                                                        "보험": 146297,
+        
+                                                        "온라인쇼핑": 538860,
+        
+                                                        "카페": 22090,
+        
+                                                        "통신": 31900
+        
+                                            }
+        
+                                },
+        
+                                "2025-09": {
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 61950,
+        
+                                                        "기타": 300,
+        
+                                                        "보험": 146297,
+        
+                                                        "온라인쇼핑": 123075,
+        
+                                                        "카페": 7300
+        
+                                            }
+        
+                                },
+        
+                                "2025-10": {
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 52690,
+        
+                                                        "기타": 16400,
+        
+                                                        "보험": 146297,
+        
+                                                        "온라인쇼핑": 92320
+        
+                                            }
+        
+                                },
+        
+                                "2025-11": {
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 63600,
+        
+                                                        "기타": 300,
+        
+                                                        "미용스포츠": 40750,
+        
+                                                        "보험": 146297,
+        
+                                                        "온라인쇼핑": 55570
+        
+                                            }
+        
+                                },
+        
+                                "2025-12": {
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 144180,
+        
+                                                        "기타": 300,
+        
+                                                        "보험": 146297,
+        
+                                                        "온라인쇼핑": 59320,
+        
+                                                        "외식": 53100,
+        
+                                                        "카페": 9000,
+        
+                                                        "편의점": 12800
+        
+                                            }
+        
+                                },
+        
+                                "2026-01": {
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 197850,
+        
+                                                        "기타": 122800,
+        
+                                                        "보험": 107297,
+        
+                                                        "온라인쇼핑": 28270,
+        
+                                                        "외식": 9500,
+        
+                                                        "카페": 31800
+        
+                                            },
+        
+                                            "우리카드 DA@카드의정석": {
+        
+                                                        "기타": 32000,
+        
+                                                        "마트": 83680,
+        
+                                                        "미용스포츠": 6950,
+        
+                                                        "온라인쇼핑": 3300,
+        
+                                                        "카페": 6000
+        
+                                            }
+        
+                                },
+        
+                                "2026-02": {
+        
+                                            "네이버 현대카드": {
+        
+                                                        "기타": 447700,
+        
+                                                        "대중교통": 30000,
+        
+                                                        "마트": 63393,
+        
+                                                        "미용스포츠": 77000,
+        
+                                                        "온라인쇼핑": 163117,
+        
+                                                        "외식": 42500,
+        
+                                                        "카페": 41400,
+        
+                                                        "편의점": 7610
+        
+                                            },
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 267790,
+        
+                                                        "기타": 36000,
+        
+                                                        "미용스포츠": 209200,
+        
+                                                        "보험": 146297,
+        
+                                                        "카페": 1200
+        
+                                            },
+        
+                                            "우리카드 DA@카드의정석": {
+        
+                                                        "온라인쇼핑": 72330,
+        
+                                                        "카페": 3200
+        
+                                            }
+        
+                                },
+        
+                                "2026-03": {
+        
+                                            "네이버 현대카드": {
+        
+                                                        "기타": 36145,
+        
+                                                        "대중교통": 30000,
+        
+                                                        "마트": 121272,
+        
+                                                        "배달": 49034,
+        
+                                                        "온라인쇼핑": 341169,
+        
+                                                        "외식": 29500,
+        
+                                                        "의료": 187600,
+        
+                                                        "카페": 18200,
+        
+                                                        "편의점": 1800
+        
+                                            },
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 230970,
+        
+                                                        "기타": 300,
+        
+                                                        "보험": 146297,
+        
+                                                        "온라인쇼핑": 2513010,
+        
+                                                        "외식": 49000,
+        
+                                                        "카페": 21700
+        
+                                            },
+        
+                                            "우리카드 DA@카드의정석": {
+        
+                                                        "기타": 359000,
+        
+                                                        "대중교통": 35170,
+        
+                                                        "온라인쇼핑": 3300,
+        
+                                                        "외식": 21600,
+        
+                                                        "카페": 3200,
+        
+                                                        "편의점": 2500
+        
+                                            }
+        
+                                },
+        
+                                "2026-04": {
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 154520,
+        
+                                                        "기타": 300,
+        
+                                                        "미용스포츠": 205600,
+        
+                                                        "보험": 146297,
+        
+                                                        "외식": 9500
+        
+                                            },
+        
+                                            "우리카드 DA@카드의정석": {
+        
+                                                        "기타": 28000,
+        
+                                                        "대중교통": 1550,
+        
+                                                        "마트": 34940,
+        
+                                                        "온라인쇼핑": 3300,
+        
+                                                        "외식": 60700,
+        
+                                                        "의료": 42120,
+        
+                                                        "카페": 48000
+        
+                                            }
+        
+                                },
+        
+                                "2026-05": {
+        
+                                            "네이버 현대카드": {
+        
+                                                        "대중교통": 42163,
+        
+                                                        "마트": 61630,
+        
+                                                        "배달": 76968,
+        
+                                                        "온라인쇼핑": 247547,
+        
+                                                        "외식": 28000,
+        
+                                                        "택시": 4700,
+        
+                                                        "통신": 36540,
+        
+                                                        "편의점": 21480
+        
+                                            },
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 115580,
+        
+                                                        "기타": 300,
+        
+                                                        "대중교통": 55000,
+        
+                                                        "미용스포츠": 89600,
+        
+                                                        "보험": 146297,
+        
+                                                        "온라인쇼핑": 28100,
+        
+                                                        "카페": 3200,
+        
+                                                        "통신": 16000
+        
+                                            },
+        
+                                            "우리카드 DA@카드의정석": {
+        
+                                                        "기타": 37000,
+        
+                                                        "마트": 30720,
+        
+                                                        "온라인쇼핑": 53510,
+        
+                                                        "외식": 200000,
+        
+                                                        "의료": 82700,
+        
+                                                        "주유": 30000,
+        
+                                                        "카페": 35300,
+        
+                                                        "편의점": 5400
+        
+                                            }
+        
+                                },
+        
+                                "2026-06": {
+        
+                                            "네이버 현대카드": {
+        
+                                                        "기타": 73230,
+        
+                                                        "마트": 46730,
+        
+                                                        "배달": 63600,
+        
+                                                        "온라인쇼핑": 32400,
+        
+                                                        "카페": 10200,
+        
+                                                        "통신": 25300
+        
+                                            },
+        
+                                            "삼성카드(탭탭오)": {
+        
+                                                        "공과금": 80990,
+        
+                                                        "미용스포츠": 119500,
+        
+                                                        "온라인쇼핑": 871730
+        
+                                            },
+        
+                                            "우리카드 DA@카드의정석": {
+        
+                                                        "기타": 5000,
+        
+                                                        "온라인쇼핑": 3300,
+        
+                                                        "외식": 18500,
+        
+                                                        "카페": 26300
+        
+                                            }
+        
+                                }
+        
+                    },
+        
+                    "customMerchants": [
+        
+                                {
+        
+                                            "id": "usage_온라인쇼핑_0",
+        
+                                            "name": "주식회사 지마켓",
+        
+                                            "topInput": "onlineShopping",
+        
+                                            "amount": 206631,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "삼성카드(탭탭오)"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_온라인쇼핑_1",
+        
+                                            "name": "쿠팡",
+        
+                                            "topInput": "onlineShopping",
+        
+                                            "amount": 79952,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "삼성카드(탭탭오)"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_보험_2",
+        
+                                            "name": "(주)케이비손해보험",
+        
+                                            "topInput": "insurance",
+        
+                                            "amount": 77676,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "삼성카드(탭탭오)"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_공과금_3",
+        
+                                            "name": "서울도시가스(주)_자동이체",
+        
+                                            "topInput": "utilities",
+        
+                                            "amount": 73305,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "삼성카드(탭탭오)"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_온라인쇼핑_4",
+        
+                                            "name": "네이버페이 네이버",
+        
+                                            "topInput": "onlineShopping",
+        
+                                            "amount": 72644,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "삼성카드(탭탭오)"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_보험_5",
+        
+                                            "name": "농협손해보험",
+        
+                                            "topInput": "insurance",
+        
+                                            "amount": 53180,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "삼성카드(탭탭오)"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_온라인쇼핑_6",
+        
+                                            "name": "네이버페이",
+        
+                                            "topInput": "onlineShopping",
+        
+                                            "amount": 51992,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_미용스포츠_7",
+        
+                                            "name": "에프알엘코리아(주)",
+        
+                                            "topInput": "beautySports",
+        
+                                            "amount": 35700,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "삼성카드(탭탭오)"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_기타_8",
+        
+                                            "name": "（주）지엔에프",
+        
+                                            "topInput": "others",
+        
+                                            "amount": 29917,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "우리카드 DA@카드의정석"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_미용스포츠_9",
+        
+                                            "name": "에프알엘코리아 주식회사",
+        
+                                            "topInput": "beautySports",
+        
+                                            "amount": 14942,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "삼성카드(탭탭오)"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_기타_10",
+        
+                                            "name": "파주연천축협한우마을",
+        
+                                            "topInput": "others",
+        
+                                            "amount": 12896,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_마트_11",
+        
+                                            "name": "네이버파이낸셜(주) - 주식회사 컬리페이",
+        
+                                            "topInput": "grocery",
+        
+                                            "amount": 12443,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_기타_12",
+        
+                                            "name": "무인양품합정점",
+        
+                                            "topInput": "others",
+        
+                                            "amount": 11785,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_온라인쇼핑_13",
+        
+                                            "name": "쿠팡",
+        
+                                            "topInput": "onlineShopping",
+        
+                                            "amount": 9937,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "우리카드 DA@카드의정석"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_의료_14",
+        
+                                            "name": "연세다온산부인과의원",
+        
+                                            "topInput": "medical",
+        
+                                            "amount": 9875,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_마트_15",
+        
+                                            "name": "윈플러스마트서부마포점",
+        
+                                            "topInput": "grocery",
+        
+                                            "amount": 8906,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_기타_16",
+        
+                                            "name": "레이몬드홍대점",
+        
+                                            "topInput": "others",
+        
+                                            "amount": 7200,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_카페_17",
+        
+                                            "name": "커피데이즈 합정역점",
+        
+                                            "topInput": "cafe",
+        
+                                            "amount": 7017,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "우리카드 DA@카드의정석"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_외식_18",
+        
+                                            "name": "우물집",
+        
+                                            "topInput": "dining",
+        
+                                            "amount": 6875,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "우리카드 DA@카드의정석"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_마트_19",
+        
+                                            "name": "주식회사 윈플러스마",
+        
+                                            "topInput": "grocery",
+        
+                                            "amount": 6741,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "우리카드 DA@카드의정석"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_배달_20",
+        
+                                            "name": "우아한형제들",
+        
+                                            "topInput": "delivery",
+        
+                                            "amount": 6633,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_의료_21",
+        
+                                            "name": "메디킹덤약국",
+        
+                                            "topInput": "medical",
+        
+                                            "amount": 6558,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "우리카드 DA@카드의정석"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_미용스포츠_22",
+        
+                                            "name": "(주)섹타나인 - 주식회사 코페이",
+        
+                                            "topInput": "beautySports",
+        
+                                            "amount": 6417,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_의료_23",
+        
+                                            "name": "삼성바른내과의원",
+        
+                                            "topInput": "medical",
+        
+                                            "amount": 5467,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_통신_24",
+        
+                                            "name": "한국정보통신 - 쿠팡",
+        
+                                            "topInput": "telecom",
+        
+                                            "amount": 5153,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_온라인쇼핑_25",
+        
+                                            "name": "토스페이먼츠주식회사 - (주)비바리퍼블리",
+        
+                                            "topInput": "onlineShopping",
+        
+                                            "amount": 5084,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_마트_26",
+        
+                                            "name": "주식회사 아성다이소",
+        
+                                            "topInput": "grocery",
+        
+                                            "amount": 5038,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "우리카드 DA@카드의정석"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_대중교통_27",
+        
+                                            "name": "모바일티머니선불형",
+        
+                                            "topInput": "transit",
+        
+                                            "amount": 5000,
+        
+                                            "checked": true,
+        
+                                            "currentCard": "네이버 현대카드"
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_공과금_etc",
+        
+                                            "name": "공과금 기타 사용처",
+        
+                                            "topInput": "utilities",
+        
+                                            "amount": 52190,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_통신_etc",
+        
+                                            "name": "통신 기타 사용처",
+        
+                                            "topInput": "telecom",
+        
+                                            "amount": 6650,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_대중교통_etc",
+        
+                                            "name": "대중교통 기타 사용처",
+        
+                                            "topInput": "transit",
+        
+                                            "amount": 11157,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_주유_etc",
+        
+                                            "name": "주유 기타 사용처",
+        
+                                            "topInput": "fuel",
+        
+                                            "amount": 2500,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_마트_etc",
+        
+                                            "name": "마트 기타 사용처",
+        
+                                            "topInput": "grocery",
+        
+                                            "amount": 8477,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_외식_etc",
+        
+                                            "name": "외식 기타 사용처",
+        
+                                            "topInput": "dining",
+        
+                                            "amount": 36617,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_배달_etc",
+        
+                                            "name": "배달 기타 사용처",
+        
+                                            "topInput": "delivery",
+        
+                                            "amount": 9167,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_카페_etc",
+        
+                                            "name": "카페 기타 사용처",
+        
+                                            "topInput": "cafe",
+        
+                                            "amount": 16991,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_온라인쇼핑_etc",
+        
+                                            "name": "온라인쇼핑 기타 사용처",
+        
+                                            "topInput": "onlineShopping",
+        
+                                            "amount": 17736,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_편의점_etc",
+        
+                                            "name": "편의점 기타 사용처",
+        
+                                            "topInput": "convenience",
+        
+                                            "amount": 4584,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_의료_etc",
+        
+                                            "name": "의료 기타 사용처",
+        
+                                            "topInput": "medical",
+        
+                                            "amount": 4135,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_미용스포츠_etc",
+        
+                                            "name": "미용스포츠 기타 사용처",
+        
+                                            "topInput": "beautySports",
+        
+                                            "amount": 5324,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                },
+        
+                                {
+        
+                                            "id": "usage_기타_etc",
+        
+                                            "name": "기타 기타 사용처",
+        
+                                            "topInput": "others",
+        
+                                            "amount": 40292,
+        
+                                            "checked": true,
+        
+                                            "currentCard": null
+        
+                                }
+        
+                    ]
+        
+        };
+        
         
         const currentCardOptions = ["삼성카드(탭탭오)", "우리카드 DA@카드의정석", "하나카드 Any PLUS", "네이버 현대카드"];
         const ownedCardProfiles = [
@@ -3930,6 +4862,9 @@
             });
         }
 
+
+        const fixedExpenseBackData = {"id":"fixed-expense-backdata-20260616-v1","label":"구글시트 고정비 마스터/일자별 백데이터 2026-06-16","sheetUrl":"https://docs.google.com/spreadsheets/d/1oI-LYQ5heIP_nz_tGa4HL2tX8YPOP01bi76kt1K7bYk/edit?usp=drive_link","masterRows":[["확정여부","신뢰도","고정비분류","가맹점","카드","월수","건수","월평균","건당평균","총액","금액범위","변동폭","샘플일자","원본파일"],["미확정","확정후보","도시가스","서울도시가스(주)_자동이체","삼성카드(탭탭오)",12,12,73305,73305,879660,"11,760~198,080원",186320,"2025-07-10, 2025-08-11, 2025-09-10, 2025-10-10, 2025-11-10, 2025-12-10","samsung_2512.pdf, samsung_current.pdf"],["미확정","확정후보","전기료","한국전력 저압 자동이체","삼성카드(탭탭오)",12,12,45773,45773,549280,"32,080~58,710원",26630,"2025-07-15, 2025-08-18, 2025-09-15, 2025-10-15, 2025-11-17, 2025-12-15","samsung_2512.pdf, samsung_current.pdf"],["미확정","확정후보","보험료","(주)케이비손해보험","삼성카드(탭탭오)",11,21,84738,44386,932113,"39,000~49,283원",10283,"2025-07-16, 2025-07-16, 2025-08-18, 2025-08-19, 2025-09-16, 2025-09-17","samsung_2512.pdf, samsung_current.pdf"],["미확정","확정후보","보험료","농협손해보험","삼성카드(탭탭오)",11,11,58014,58014,638154,"58,014~58,014원",0,"2025-07-18, 2025-08-20, 2025-09-19, 2025-10-20, 2025-11-20, 2025-12-19","samsung_2512.pdf, samsung_current.pdf"],["미확정","확정후보","폰요금","LGU+ 통신","삼성카드(탭탭오)",2,2,31900,31900,63800,"31,900~31,900원",0,"2025-07-09, 2025-08-11","samsung_2512.pdf"],["미확정","확정후보","APP구독료","Ａｐｐ Ｓｔｏｒｅ","우리카드 DA@카드의정석",6,6,3300,3300,19800,"3,300~3,300원",0,"2026-01-14, 2026-02-14, 2026-03-14, 2026-04-14, 2026-05-14, 2026-06-14","woori_report_0.xls, woori_report_1.xls, woori_report_6.xls"],["미확정","생활고정후보","마트장보기","아성다이소","삼성카드(탭탭오)",1,1,56900,56900,56900,"56,900~56,900원",0,"2025-07-06","samsung_2512.pdf"],["미확정","생활고정후보","마트장보기","아성다이소","우리카드 DA@카드의정석",1,1,8000,8000,8000,"8,000~8,000원",0,"2026-04-22","woori_report_0.xls"],["미확정","생활고정후보","마트장보기","윈플러스마트서부마포점","네이버 현대카드",4,5,26718,21374,106870,"9,890~28,330원",18440,"2026-02-16, 2026-03-13, 2026-03-20, 2026-05-13, 2026-06-01","hyundai_0.xls, hyundai_1.xls, hyundai_2.xls, hyundai_4.xls"],["미확정","생활고정후보","마트장보기","주식회사 아성다이소","우리카드 DA@카드의정석",1,1,60450,60450,60450,"60,450~60,450원",0,"2026-01-29","woori_report_1.xls"],["미확정","생활고정후보","마트장보기","주식회사 윈플러스마","우리카드 DA@카드의정석",3,4,26963,20222,80890,"13,260~26,940원",13680,"2026-01-23, 2026-04-07, 2026-05-19, 2026-05-20","woori_report_0.xls, woori_report_1.xls"],["미확정","확정후보","케이블/인터넷","DLIVE마포케이블","삼성카드(탭탭오)",1,1,11000,11000,11000,"11,000~11,000원",0,"2025-12-23","samsung_2512.pdf"],["미확정","확정후보","케이블/인터넷","케이블TV 2(주)딜라이브마0","삼성카드(탭탭오)",4,4,11000,11000,44000,"11,000~11,000원",0,"2026-01-15, 2026-02-19, 2026-03-16, 2026-04-15","samsung_current.pdf"],["미확정","확정후보","케이블/인터넷","케이블TV 2(주)딜라이브마B","삼성카드(탭탭오)",2,2,11000,11000,22000,"11,000~11,000원",0,"2026-05-15, 2026-06-15","samsung_current.pdf"],["미발견","확인필요","수도","사용내역에서 자동 발견 안됨","",0,0,0,0,0,"-",0,"",""],["미발견","확인필요","AI구독료","사용내역에서 자동 발견 안됨","",0,0,0,0,0,"-",0,"",""],["미발견","확인필요","온라인 데이터","사용내역에서 자동 발견 안됨","",0,0,0,0,0,"-",0,"",""]],"dailyRows":[["이용일","월","고정비분류","카드","가맹점","정규화가맹점","금액","원분류","원본파일"],["2025-07-06","2025-07","마트장보기","삼성카드(탭탭오)","아성다이소","아성다이소",56900,"마트","samsung_2512.pdf"],["2025-07-09","2025-07","폰요금","삼성카드(탭탭오)","LGU+ 통신 06월 - 701447","LGU+ 통신",31900,"통신","samsung_2512.pdf"],["2025-07-10","2025-07","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",25180,"공과금","samsung_2512.pdf"],["2025-07-15","2025-07","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 25년 06월","한국전력 저압 자동이체",43390,"공과금","samsung_2512.pdf"],["2025-07-16","2025-07","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",39000,"보험","samsung_2512.pdf"],["2025-07-16","2025-07","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_2512.pdf"],["2025-07-18","2025-07","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_2512.pdf"],["2025-08-11","2025-08","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",17990,"공과금","samsung_2512.pdf"],["2025-08-11","2025-08","폰요금","삼성카드(탭탭오)","LGU+ 통신 07월 - 701447","LGU+ 통신",31900,"통신","samsung_2512.pdf"],["2025-08-18","2025-08","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",39000,"보험","samsung_2512.pdf"],["2025-08-18","2025-08","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 25년 07월","한국전력 저압 자동이체",49260,"공과금","samsung_2512.pdf"],["2025-08-19","2025-08","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_2512.pdf"],["2025-08-20","2025-08","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_2512.pdf"],["2025-09-10","2025-09","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",11760,"공과금","samsung_2512.pdf"],["2025-09-15","2025-09","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 25년 08월","한국전력 저압 자동이체",50190,"공과금","samsung_2512.pdf"],["2025-09-16","2025-09","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",39000,"보험","samsung_2512.pdf"],["2025-09-17","2025-09","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_2512.pdf"],["2025-09-19","2025-09","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_2512.pdf"],["2025-10-10","2025-10","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",13840,"공과금","samsung_2512.pdf"],["2025-10-15","2025-10","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 25년 09월","한국전력 저압 자동이체",38850,"공과금","samsung_2512.pdf"],["2025-10-16","2025-10","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",39000,"보험","samsung_2512.pdf"],["2025-10-20","2025-10","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_2512.pdf"],["2025-10-20","2025-10","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_2512.pdf"],["2025-11-10","2025-11","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",31520,"공과금","samsung_2512.pdf"],["2025-11-17","2025-11","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",39000,"보험","samsung_2512.pdf"],["2025-11-17","2025-11","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 25년 10월","한국전력 저압 자동이체",32080,"공과금","samsung_2512.pdf"],["2025-11-19","2025-11","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_2512.pdf"],["2025-11-20","2025-11","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_2512.pdf"],["2025-12-10","2025-12","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",84510,"공과금","samsung_2512.pdf"],["2025-12-15","2025-12","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 25년 11월","한국전력 저압 자동이체",48670,"공과금","samsung_2512.pdf"],["2025-12-16","2025-12","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",39000,"보험","samsung_2512.pdf"],["2025-12-17","2025-12","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_2512.pdf"],["2025-12-19","2025-12","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_2512.pdf"],["2025-12-23","2025-12","케이블/인터넷","삼성카드(탭탭오)","DLIVE마포케이블","DLIVE마포케이블",11000,"공과금","samsung_2512.pdf"],["2026-01-12","2026-01","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",138700,"공과금","samsung_current.pdf"],["2026-01-14","2026-01","APP구독료","우리카드 DA@카드의정석","Ａｐｐ Ｓｔｏｒｅ","Ａｐｐ Ｓｔｏｒｅ",3300,"온라인쇼핑","woori_report_1.xls"],["2026-01-15","2026-01","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 25년 12월","한국전력 저압 자동이체",48150,"공과금","samsung_current.pdf"],["2026-01-15","2026-01","케이블/인터넷","삼성카드(탭탭오)","케이블TV 2(주)딜라이브마0","케이블TV 2(주)딜라이브마0",11000,"공과금","samsung_current.pdf"],["2026-01-23","2026-01","마트장보기","우리카드 DA@카드의정석","주식회사 윈플러스마","주식회사 윈플러스마",23230,"마트","woori_report_1.xls"],["2026-01-27","2026-01","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_current.pdf"],["2026-01-29","2026-01","마트장보기","우리카드 DA@카드의정석","주식회사 아성다이소","주식회사 아성다이소",60450,"마트","woori_report_1.xls"],["2026-01-30","2026-01","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_current.pdf"],["2026-02-10","2026-02","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",198080,"공과금","samsung_current.pdf"],["2026-02-14","2026-02","APP구독료","우리카드 DA@카드의정석","Ａｐｐ Ｓｔｏｒｅ","Ａｐｐ Ｓｔｏｒｅ",3300,"온라인쇼핑","woori_report_1.xls"],["2026-02-16","2026-02","마트장보기","네이버 현대카드","윈플러스마트서부마포점","윈플러스마트서부마포점",25920,"마트","hyundai_4.xls"],["2026-02-19","2026-02","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",39000,"보험","samsung_current.pdf"],["2026-02-19","2026-02","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 26년 01월","한국전력 저압 자동이체",58710,"공과금","samsung_current.pdf"],["2026-02-19","2026-02","케이블/인터넷","삼성카드(탭탭오)","케이블TV 2(주)딜라이브마0","케이블TV 2(주)딜라이브마0",11000,"공과금","samsung_current.pdf"],["2026-02-20","2026-02","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_current.pdf"],["2026-02-20","2026-02","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_current.pdf"],["2026-03-10","2026-03","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",171300,"공과금","samsung_current.pdf"],["2026-03-13","2026-03","마트장보기","네이버 현대카드","윈플러스마트서부마포점","윈플러스마트서부마포점",26230,"마트","hyundai_2.xls"],["2026-03-13","2026-03","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",39000,"보험","samsung_current.pdf"],["2026-03-14","2026-03","APP구독료","우리카드 DA@카드의정석","Ａｐｐ Ｓｔｏｒｅ","Ａｐｐ Ｓｔｏｒｅ",3300,"온라인쇼핑","woori_report_0.xls"],["2026-03-16","2026-03","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 26년 02월","한국전력 저압 자동이체",48670,"공과금","samsung_current.pdf"],["2026-03-16","2026-03","케이블/인터넷","삼성카드(탭탭오)","케이블TV 2(주)딜라이브마0","케이블TV 2(주)딜라이브마0",11000,"공과금","samsung_current.pdf"],["2026-03-18","2026-03","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_current.pdf"],["2026-03-20","2026-03","마트장보기","네이버 현대카드","윈플러스마트서부마포점","윈플러스마트서부마포점",16500,"마트","hyundai_2.xls"],["2026-03-20","2026-03","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_current.pdf"],["2026-04-07","2026-04","마트장보기","우리카드 DA@카드의정석","주식회사 윈플러스마","주식회사 윈플러스마",26940,"마트","woori_report_0.xls"],["2026-04-10","2026-04","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",102580,"공과금","samsung_current.pdf"],["2026-04-14","2026-04","APP구독료","우리카드 DA@카드의정석","Ａｐｐ Ｓｔｏｒｅ","Ａｐｐ Ｓｔｏｒｅ",3300,"온라인쇼핑","woori_report_0.xls"],["2026-04-15","2026-04","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_current.pdf"],["2026-04-15","2026-04","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 26년 03월","한국전력 저압 자동이체",40940,"공과금","samsung_current.pdf"],["2026-04-15","2026-04","케이블/인터넷","삼성카드(탭탭오)","케이블TV 2(주)딜라이브마0","케이블TV 2(주)딜라이브마0",11000,"공과금","samsung_current.pdf"],["2026-04-16","2026-04","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",39000,"보험","samsung_current.pdf"],["2026-04-20","2026-04","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_current.pdf"],["2026-04-22","2026-04","마트장보기","우리카드 DA@카드의정석","아성다이소","아성다이소",8000,"마트","woori_report_0.xls"],["2026-05-11","2026-05","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",54630,"공과금","samsung_current.pdf"],["2026-05-13","2026-05","마트장보기","네이버 현대카드","윈플러스마트서부마포점","윈플러스마트서부마포점",28330,"마트","hyundai_1.xls"],["2026-05-14","2026-05","APP구독료","우리카드 DA@카드의정석","Ａｐｐ Ｓｔｏｒｅ","Ａｐｐ Ｓｔｏｒｅ",3300,"온라인쇼핑","woori_report_0.xls"],["2026-05-15","2026-05","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 26년 04월","한국전력 저압 자동이체",49950,"공과금","samsung_current.pdf"],["2026-05-15","2026-05","케이블/인터넷","삼성카드(탭탭오)","케이블TV 2(주)딜라이브마B","케이블TV 2(주)딜라이브마B",11000,"공과금","samsung_current.pdf"],["2026-05-18","2026-05","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",39000,"보험","samsung_current.pdf"],["2026-05-18","2026-05","보험료","삼성카드(탭탭오)","(주)케이비손해보험","(주)케이비손해보험",49283,"보험","samsung_current.pdf"],["2026-05-19","2026-05","마트장보기","우리카드 DA@카드의정석","주식회사 윈플러스마","주식회사 윈플러스마",17460,"마트","woori_report_0.xls"],["2026-05-20","2026-05","마트장보기","우리카드 DA@카드의정석","주식회사 윈플러스마","주식회사 윈플러스마",13260,"마트","woori_report_0.xls"],["2026-05-20","2026-05","보험료","삼성카드(탭탭오)","농협손해보험","농협손해보험",58014,"보험","samsung_current.pdf"],["2026-06-01","2026-06","마트장보기","네이버 현대카드","윈플러스마트서부마포점","윈플러스마트서부마포점",9890,"마트","hyundai_0.xls"],["2026-06-10","2026-06","도시가스","삼성카드(탭탭오)","서울도시가스(주)_자동이체","서울도시가스(주)_자동이체",29570,"공과금","samsung_current.pdf"],["2026-06-14","2026-06","APP구독료","우리카드 DA@카드의정석","Ａｐｐ Ｓｔｏｒｅ","Ａｐｐ Ｓｔｏｒｅ",3300,"온라인쇼핑","woori_report_6.xls"],["2026-06-15","2026-06","전기료","삼성카드(탭탭오)","한국전력 저압 자동이체 26년 05월","한국전력 저압 자동이체",40420,"공과금","samsung_current.pdf"],["2026-06-15","2026-06","케이블/인터넷","삼성카드(탭탭오)","케이블TV 2(주)딜라이브마B","케이블TV 2(주)딜라이브마B",11000,"공과금","samsung_current.pdf"]]};
+
         function applyImportedCardUsagePreset(force = false) {
             if (!importedCardUsagePreset?.customMerchants?.length) return;
             const appliedKey = 'cardUsagePresetApplied';
@@ -4126,6 +5061,40 @@
 
         const usageChartColors = ['#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#14B8A6', '#F97316', '#64748B'];
 
+        function renderCategoryUsageDetails(transactions, categoryEntries) {
+            if (!transactions.length) {
+                return renderBreakdownRows(categoryEntries, '이 월의 카테고리별 사용액이 없습니다.');
+            }
+            const byCategory = transactions.reduce((map, row) => {
+                const key = row.category || '기타';
+                if (!map[key]) map[key] = { total: 0, rows: [] };
+                map[key].total += Number(row.amount) || 0;
+                map[key].rows.push(row);
+                return map;
+            }, {});
+            return `
+                <div class="category-detail-stack">
+                    ${Object.entries(byCategory).sort((a, b) => b[1].total - a[1].total).map(([category, item]) => {
+                        const detail = item.rows
+                            .slice()
+                            .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+                            .slice(0, 6)
+                            .map(row => `${String(row.date).slice(5)} ${row.merchant} ${formatWon(row.amount)}`)
+                            .join(' · ');
+                        return `
+                            <div class="category-detail-row">
+                                <div class="category-detail-head">
+                                    <strong>${escapeHtml(category)}</strong>
+                                    <strong>${formatWon(item.total)}</strong>
+                                </div>
+                                <div class="category-detail-dates">${escapeHtml(detail)}${item.rows.length > 6 ? ` · 외 ${item.rows.length - 6}건` : ''}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
         function renderUsageVisuals(categoryEntries, total) {
             const donut = document.getElementById('usageCategoryDonut');
             const totalEl = document.getElementById('usageDonutTotal');
@@ -4203,12 +5172,13 @@
             const daily = transactions.reduce((map, row) => {
                 const day = Number(String(row.date || '').slice(-2));
                 if (!day) return map;
-                if (!map[day]) map[day] = { total: 0, count: 0, cards: {}, categories: {} };
+                if (!map[day]) map[day] = { total: 0, count: 0, cards: {}, categories: {}, rows: [] };
                 const amount = Number(row.amount) || 0;
                 map[day].total += amount;
                 map[day].count += 1;
                 map[day].cards[row.card] = (map[day].cards[row.card] || 0) + amount;
                 map[day].categories[row.category] = (map[day].categories[row.category] || 0) + amount;
+                map[day].rows.push(row);
                 return map;
             }, {});
 
@@ -4243,12 +5213,24 @@
             for (let day = 1; day <= daysInMonth; day += 1) {
                 const item = daily[day];
                 const topDailyCategory = item ? Object.entries(item.categories).sort((a, b) => b[1] - a[1])[0] : null;
+                const dayRows = (item?.rows || []).slice().sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0)).slice(0, 3);
                 cells.push(`
                     <div class="calendar-day ${item ? 'has-spend' : ''}">
                         <div class="calendar-day-number">${day}</div>
                         ${item ? `
                             <div class="calendar-day-amount">${formatWon(item.total)}</div>
                             <div class="calendar-day-meta">${transactions.length ? `${item.count}건` : '월 합계'} · ${escapeHtml(topDailyCategory?.[0] || '')}</div>
+                            ${dayRows.length ? `
+                                <div class="calendar-day-list">
+                                    ${dayRows.map(row => `
+                                        <div class="calendar-day-txn" title="${escapeHtml(row.card)} · ${escapeHtml(row.category)} · ${escapeHtml(row.merchant)}">
+                                            <span>${escapeHtml(row.merchant)}</span>
+                                            <strong>${formatWon(row.amount)}</strong>
+                                        </div>
+                                    `).join('')}
+                                    ${item.rows.length > 3 ? `<div class="calendar-day-meta">외 ${item.rows.length - 3}건</div>` : ''}
+                                </div>
+                            ` : ''}
                         ` : ''}
                     </div>
                 `);
@@ -4256,7 +5238,7 @@
             gridEl.innerHTML = cells.join('');
 
             cardBreakdownEl.innerHTML = renderBreakdownRows(cardEntries, '이 월의 카드별 사용액이 없습니다.');
-            categoryBreakdownEl.innerHTML = renderBreakdownRows(categoryEntries, '이 월의 카테고리별 사용액이 없습니다.');
+            categoryBreakdownEl.innerHTML = renderCategoryUsageDetails(transactions, categoryEntries);
             installmentBreakdownEl.innerHTML = renderInstallmentRows(getInstallmentBreakdown(month, card, transactions, cardEntries));
             renderUsageVisuals(categoryEntries, monthlyTotal);
 
@@ -4527,6 +5509,7 @@
 
         function saveDetailedInputState() {
             localStorage.setItem('cardDetailedInputs', JSON.stringify(getDetailedInputState()));
+            saveSyncReadySnapshot('detailed-input');
         }
 
         function loadDetailedInputState() {
@@ -5240,6 +6223,22 @@
             saveDetailedInputState();
             savePaymentState();
             saveCustomMerchants();
+            saveSyncReadySnapshot('expenses');
+        }
+
+        function saveSyncReadySnapshot(reason = 'change') {
+            const snapshot = {
+                version: 'sync-ready-20260616',
+                reason,
+                savedAt: new Date().toISOString(),
+                expenses: getPaymentBreakdown?.() || {},
+                fixedExpenses: getFixedExpenseState?.() || {},
+                selectedScenarioCardIds,
+                customMerchants: JSON.parse(localStorage.getItem('cardCustomMerchants') || '[]'),
+                detailedInputs: JSON.parse(localStorage.getItem('cardDetailedInputs') || '{}')
+            };
+            localStorage.setItem('cardBenefitSyncDraft', JSON.stringify(snapshot));
+            return snapshot;
         }
 
         // 저장된 지출 불러오기
@@ -5919,6 +6918,7 @@
         function renderEventComparePage() {
             const table = document.getElementById('eventCompareTable');
             const summary = document.getElementById('eventCompareSummary');
+            const rankCards = document.getElementById('eventRankCards');
             if (!table || !summary) return;
 
             const expenses = getExpenses();
@@ -5943,6 +6943,33 @@
                 <div class="calendar-kpi"><span>가입혜택 1위</span><strong>${bestEvent ? `${bestEvent.name} ${formatWon(bestEvent.analysis.eventValue)}` : '-'}</strong></div>
                 <div class="calendar-kpi"><span>월 실질혜택 1위</span><strong>${bestMonthly ? `${bestMonthly.name} ${formatSignedWon(bestMonthly.analysis.netMonthlyBenefit)}` : '-'}</strong></div>
             `;
+
+            if (rankCards) {
+                rankCards.innerHTML = rows.slice(0, 6).map((card, index) => {
+                    const a = card.analysis;
+                    const topItems = (a.categoryDetails || [])
+                        .filter(item => item.benefit > 0)
+                        .sort((x, y) => y.benefit - x.benefit)
+                        .slice(0, 3)
+                        .map(item => `${item.category} ${formatWon(item.benefit)}`)
+                        .join(' · ') || '적용 할인 없음';
+                    return `
+                        <div class="event-rank-card ${index === 0 ? 'top' : ''}">
+                            <div class="event-rank-title">
+                                <strong>${index + 1}. ${escapeHtml(card.name)}</strong>
+                                <span class="badge ${a.firstYearNetBenefit >= 0 ? 'badge-success' : 'badge-warning'}">${formatSignedWon(a.firstYearNetBenefit)}</span>
+                            </div>
+                            <span class="source-note">${escapeHtml(card.company)} · ${escapeHtml(card.channel)}${a.selectedPackName ? ` · ${escapeHtml(a.selectedPackName)}` : ''}</span>
+                            <div class="breakdown-row"><span>월 실질혜택</span><strong>${formatSignedWon(a.netMonthlyBenefit)}</strong></div>
+                            <div class="breakdown-row"><span>월 할인</span><strong>${formatWon(a.monthlyDiscount)}</strong></div>
+                            <div class="breakdown-row"><span>가입혜택</span><strong>${formatWon(a.eventValue)}</strong></div>
+                            <div class="breakdown-row"><span>실적 인정</span><strong>${formatWon(a.performance.eligibleSpending)}</strong></div>
+                            <span class="source-note">${escapeHtml(topItems)}</span>
+                            ${renderTrapVerdict(card, a)}
+                        </div>
+                    `;
+                }).join('');
+            }
 
             table.innerHTML = rows.map((card, index) => {
                 const a = card.analysis;
@@ -6008,9 +7035,171 @@
                 || '기타';
         }
 
+
+        const fixedExpenseCategoryMap = {
+            "도시가스": "공과금",
+            "전기료": "공과금",
+            "수도": "공과금",
+            "케이블/인터넷": "공과금",
+            "보험료": "보험",
+            "폰요금": "통신",
+            "APP구독료": "앱결제",
+            "AI구독료": "AI구독",
+            "온라인 데이터": "온라인쇼핑",
+            "마트장보기": "마트"
+        };
+
+        function normalizeFixedInputId(value) {
+            return String(value || '')
+                .replace(/[^\w가-힣]+/g, '_')
+                .replace(/^_+|_+$/g, '')
+                .slice(0, 80);
+        }
+
+        function mapFixedExpenseCategory(category) {
+            return fixedExpenseCategoryMap[category] || category || "기타";
+        }
+
+        function getFixedMasterObjects() {
+            const rows = fixedExpenseBackData?.masterRows || [];
+            const headers = rows[0] || [];
+            return rows.slice(1).map((row, index) => {
+                const item = {};
+                headers.forEach((header, cellIndex) => {
+                    item[header] = row[cellIndex];
+                });
+                item.index = index;
+                return item;
+            });
+        }
+
+        function getFixedDailyObjects() {
+            const rows = fixedExpenseBackData?.dailyRows || [];
+            const headers = rows[0] || [];
+            return rows.slice(1).map(row => {
+                const item = {};
+                headers.forEach((header, cellIndex) => {
+                    item[header] = row[cellIndex];
+                });
+                return item;
+            });
+        }
+
+        function buildFixedExpenseRows(fixedState = getFixedExpenseState(), combo = lastBestCombo) {
+            return getFixedMasterObjects()
+                .filter(item => item["확정여부"] !== "미발견" && Number(item["월평균"] || 0) > 0)
+                .map(item => {
+                    const fixedCategory = item["고정비분류"];
+                    const merchant = item["가맹점"] || "고정비";
+                    const currentCard = item["카드"] || currentCardOptions[0];
+                    const category = mapFixedExpenseCategory(fixedCategory);
+                    const inputId = `fixed_${item.index}_${normalizeFixedInputId(`${fixedCategory}_${merchant}_${currentCard}`)}`;
+                    const defaultConfirmed = item["신뢰도"] === "확정후보";
+                    const fixedConfirmed = fixedState[inputId] ?? defaultConfirmed;
+                    const recommended = combo ? recommendOwnedCardForCategory(category) : recommendOwnedCardForCategory(category);
+                    return {
+                        inputId,
+                        label: `${fixedCategory} · ${merchant}`,
+                        amount: Number(item["월평균"] || 0),
+                        category,
+                        currentCard,
+                        recommended,
+                        fixedConfirmed,
+                        fixedCandidate: true,
+                        status: recommended ? (recommended === currentCard ? "유지" : "전환 후보") : "분석 필요",
+                        sourceType: "fixedBackData",
+                        confidence: item["신뢰도"],
+                        monthCount: Number(item["월수"] || 0),
+                        transactionCount: Number(item["건수"] || 0),
+                        amountRange: item["금액범위"] || "-",
+                        source: item["원본파일"] || fixedExpenseBackData.label
+                    };
+                });
+        }
+
+        function renderFixedBackDataSummary(rows, fixedMap) {
+            const target = document.getElementById("fixedBackDataSummary");
+            if (!target) return;
+            const masterRows = rows.filter(row => row.sourceType === "fixedBackData");
+            const dailyRows = getFixedDailyObjects();
+            const byCategory = masterRows.reduce((map, row) => {
+                if (!map[row.category]) map[row.category] = { total: 0, count: 0, labels: [] };
+                map[row.category].total += row.amount;
+                map[row.category].count += 1;
+                map[row.category].labels.push(row.label);
+                return map;
+            }, {});
+            const confirmedTotal = Object.values(fixedMap || {}).reduce((sum, item) => sum + item.total, 0);
+            const latestDaily = dailyRows.slice().reverse().slice(0, 12);
+
+            target.innerHTML = `
+                <div class="insight-grid" style="margin-top: 18px;">
+                    <div class="insight-card">
+                        <span class="insight-label">고정비 백데이터</span>
+                        <span class="insight-value">${masterRows.length.toLocaleString("ko-KR")}개</span>
+                    </div>
+                    <div class="insight-card">
+                        <span class="insight-label">일자별 근거</span>
+                        <span class="insight-value">${dailyRows.length.toLocaleString("ko-KR")}건</span>
+                    </div>
+                    <div class="insight-card">
+                        <span class="insight-label">확정 반영액</span>
+                        <span class="insight-value">${formatWon(confirmedTotal)}</span>
+                    </div>
+                </div>
+                <div class="table-wrap" style="margin-top: 12px;">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>분류</th>
+                                <th>월평균</th>
+                                <th>항목수</th>
+                                <th>주요 결제처</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(byCategory).sort((a, b) => b[1].total - a[1].total).map(([category, item]) => `
+                                <tr>
+                                    <td>${category}</td>
+                                    <td>${formatWon(item.total)}</td>
+                                    <td>${item.count}개</td>
+                                    <td>${item.labels.slice(0, 3).join(" · ")}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-wrap" style="margin-top: 12px;">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>최근일자</th>
+                                <th>분류</th>
+                                <th>카드</th>
+                                <th>가맹점</th>
+                                <th>금액</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${latestDaily.map(item => `
+                                <tr>
+                                    <td>${item["이용일"] || "-"}</td>
+                                    <td>${item["고정비분류"] || "-"}</td>
+                                    <td>${item["카드"] || "-"}</td>
+                                    <td>${item["가맹점"] || "-"}</td>
+                                    <td>${formatWon(Number(item["금액"] || 0))}</td>
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+                <span class="source-note">출처: <a href="${fixedExpenseBackData.sheetUrl}" target="_blank" rel="noopener">구글시트 고정비 마스터</a>. 확정후보는 기본 체크, 생활고정후보는 과대계산 방지를 위해 후보로 표시됩니다.</span>
+            `;
+        }
+
         function getCurrentCardUsageRows(combo = lastBestCombo) {
             const fixedState = getFixedExpenseState();
-            return [...document.querySelectorAll('.merchant-row')].map(row => {
+            const manualRows = [...document.querySelectorAll('.merchant-row')].map(row => {
                 const amountInput = row.querySelector('input:not([type="checkbox"])');
                 const checkbox = row.querySelector('input[type="checkbox"]');
                 const select = row.querySelector('.merchant-card-select');
@@ -6033,10 +7222,15 @@
                     recommended,
                     fixedConfirmed,
                     fixedCandidate: fixedDefault,
-                    status: recommended ? (recommended === currentCard ? '유지' : '전환 후보') : '분석 필요'
+                    status: recommended ? (recommended === currentCard ? '유지' : '전환 후보') : '분석 필요',
+                    sourceType: 'manual'
                 };
-            }).filter(Boolean).sort((a, b) => b.amount - a.amount);
+            }).filter(Boolean);
+
+            return [...buildFixedExpenseRows(fixedState, combo), ...manualRows]
+                .sort((a, b) => b.amount - a.amount);
         }
+
 
         function isDefaultFixedExpense(category, label = '') {
             const text = `${category} ${label}`;
@@ -6059,9 +7253,15 @@
             const state = getFixedExpenseState();
             state[inputId] = Boolean(checked);
             saveFixedExpenseState(state);
+            saveSyncReadySnapshot('fixed-expense');
             updateOwnedCardList(lastAnalysisResults, lastBestCombo);
             updateDiscountPerformanceCards(lastAnalysisResults);
             refreshNotionPreview();
+        }
+
+        function toggleUnconfirmedFixedRows(checked) {
+            showUnconfirmedFixedRows = Boolean(checked);
+            updateOwnedCardList(lastAnalysisResults, lastBestCombo);
         }
 
         function getFixedExpensesByCard(rows = getCurrentCardUsageRows(lastBestCombo)) {
@@ -6074,6 +7274,67 @@
                 map[cardName].rows.push(row);
                 return map;
             }, {});
+        }
+
+        function renderFixedCategorySummary(rows) {
+            const target = document.getElementById('fixedCategorySummary');
+            const visibility = document.getElementById('fixedVisibilitySummary');
+            const toggle = document.getElementById('showUnconfirmedFixedRows');
+            if (!target) return;
+            if (toggle) toggle.checked = showUnconfirmedFixedRows;
+            const confirmedRows = rows.filter(row => row.fixedConfirmed);
+            const hiddenCount = rows.filter(row => !row.fixedConfirmed).length;
+            if (visibility) {
+                visibility.textContent = showUnconfirmedFixedRows
+                    ? `미확정 후보 ${hiddenCount}건까지 표시 중입니다.`
+                    : `미확정 후보 ${hiddenCount}건은 숨김 처리 중입니다.`;
+            }
+            const byCategory = confirmedRows.reduce((map, row) => {
+                const key = row.category || '기타';
+                if (!map[key]) map[key] = { total: 0, count: 0, cards: new Set(), labels: [] };
+                map[key].total += row.amount;
+                map[key].count += 1;
+                map[key].cards.add(row.currentCard);
+                map[key].labels.push(row.label);
+                return map;
+            }, {});
+            const rowsHtml = Object.entries(byCategory)
+                .sort((a, b) => b[1].total - a[1].total)
+                .map(([category, item]) => `
+                    <tr>
+                        <td><strong>${category}</strong></td>
+                        <td>${formatWon(item.total)}</td>
+                        <td>${formatWon(item.total / Math.max(item.count, 1))}</td>
+                        <td>${item.count}건</td>
+                        <td>${[...item.cards].join(' · ')}</td>
+                    </tr>
+                `).join('');
+            const total = confirmedRows.reduce((sum, row) => sum + row.amount, 0);
+            target.innerHTML = `
+                <div class="table-wrap" style="margin: 12px 0;">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>분류</th>
+                                <th>월평균 합산</th>
+                                <th>건당 월평균</th>
+                                <th>확정건수</th>
+                                <th>카드</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml || '<tr><td colspan="5">확정된 고정비가 없습니다.</td></tr>'}
+                            <tr>
+                                <td><strong>합계</strong></td>
+                                <td><strong>${formatWon(total)}</strong></td>
+                                <td>-</td>
+                                <td>${confirmedRows.length}건</td>
+                                <td>-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
         }
 
         function getCategorySpend(expenses, categories) {
@@ -6143,9 +7404,11 @@
             const fixedCount = Object.values(fixedMap).reduce((sum, item) => sum + item.count, 0);
             if (fixedSummary) {
                 fixedSummary.textContent = fixedCount
-                    ? `고정지출 ${fixedCount}건, ${formatWon(fixedTotal)} 확정. 체크된 항목은 현재 카드별 고정지출 실적·혜택 예상에 반영됩니다.`
+                    ? `백데이터 기준 고정지출 ${fixedCount}건, ${formatWon(fixedTotal)} 반영 중. 체크 상태를 바꾸면 카드별 실적·혜택 예상에 바로 반영됩니다.`
                     : '고정지출로 확정할 결제처를 체크하면 해당 카드의 고정지출 실적·혜택 예상에 반영됩니다.';
             }
+            renderFixedCategorySummary(rows);
+            renderFixedBackDataSummary(rows, fixedMap);
 
             list.innerHTML = ownedCardProfiles.map(profile => {
                 const estimate = estimateOwnedCardProfile(profile, fixedMap);
@@ -6167,10 +7430,12 @@
                 `;
             }).join('');
 
-            table.innerHTML = rows.length ? rows.map(row => `
+            const visibleRows = showUnconfirmedFixedRows ? rows : rows.filter(row => row.fixedConfirmed);
+            table.innerHTML = visibleRows.length ? visibleRows.map(row => `
                 <tr>
                     <td><label style="display:flex; align-items:center; justify-content:center; gap:6px; margin:0;"><input type="checkbox" ${row.fixedConfirmed ? 'checked' : ''} onchange="setFixedExpense('${row.inputId}', this.checked)"> 확정</label></td>
-                    <td>${row.label}</td>
+                    <td><span class="badge badge-success">${row.category}</span></td>
+                    <td>${row.label}<span class="source-note">${row.sourceType === 'fixedBackData' ? `${row.confidence} · ${row.transactionCount}건 · ${row.amountRange}` : ''}</span></td>
                     <td>${row.currentCard}</td>
                     <td>${formatWon(row.amount)}</td>
                     <td>${row.recommended || '-'}</td>
@@ -6178,7 +7443,7 @@
                 </tr>
             `).join('') : `
                 <tr>
-                    <td colspan="6">등록된 기존 카드 결제처가 없습니다.</td>
+                    <td colspan="7">표시할 고정 결제처가 없습니다. 미확정 후보까지 보려면 위 토글을 켜주세요.</td>
                 </tr>
             `;
         }
@@ -6236,6 +7501,189 @@
             return output;
         }
 
+        function getScenarioCardId(card) {
+            return normalizeFixedInputId(card.id || `${card.company}_${card.name}`);
+        }
+
+        function getScenarioSelectedCards(results = lastAnalysisResults || []) {
+            const pool = getScenarioCardPool(results);
+            return selectedScenarioCardIds
+                .map(id => pool.find(card => getScenarioCardId(card) === id))
+                .filter(Boolean);
+        }
+
+        function getScenarioOwnedCards() {
+            const fixedMap = getFixedExpensesByCard(getCurrentCardUsageRows(lastBestCombo));
+            return ownedCardProfiles.map(profile => {
+                const estimate = estimateOwnedCardProfile(profile, fixedMap);
+                return {
+                    id: `OWNED-${getScenarioCardId(profile)}`,
+                    name: profile.name,
+                    company: profile.issuer,
+                    channel: "보유카드",
+                    isOwnedCard: true,
+                    analysis: {
+                        categoryDetails: estimate.details.map(detail => ({
+                            category: detail.label,
+                            benefit: detail.benefit,
+                            expense: detail.spend
+                        })),
+                        eventMonthlyValue: 0,
+                        eventValue: 0,
+                        monthlyAnnualFee: estimate.monthlyAnnualFee,
+                        effectiveAnnualFee: profile.annualFee || 0,
+                        netMonthlyBenefit: estimate.netMonthlyBenefit,
+                        firstYearNetBenefit: (estimate.monthlyBenefit * 12) - (profile.annualFee || 0)
+                    }
+                };
+            });
+        }
+
+        function getScenarioCardPool(results = lastAnalysisResults || []) {
+            const eventCards = (results || []).map(card => ({ ...card, isOwnedCard: false }));
+            const ownedCards = getScenarioOwnedCards();
+            const seen = new Set();
+            return [...ownedCards, ...eventCards].filter(card => {
+                const id = getScenarioCardId(card);
+                if (seen.has(id)) return false;
+                seen.add(id);
+                return true;
+            });
+        }
+
+        function calculateComboScenario(cards, totalSpending) {
+            const bestByArea = new Map();
+            cards.forEach(card => {
+                (card.analysis?.categoryDetails || []).forEach(detail => {
+                    const key = detail.category;
+                    const current = bestByArea.get(key);
+                    if (!current || detail.benefit > current.benefit) {
+                        bestByArea.set(key, {
+                            area: key,
+                            benefit: detail.benefit,
+                            cardName: card.name
+                        });
+                    }
+                });
+            });
+
+            const monthlyDiscount = [...bestByArea.values()].reduce((sum, item) => sum + item.benefit, 0);
+            const eventMonthlyValue = cards.reduce((sum, card) => sum + (card.analysis?.eventMonthlyValue || 0), 0);
+            const annualFeeMonthly = cards.reduce((sum, card) => sum + (card.analysis?.monthlyAnnualFee || 0), 0);
+            const eventValue = cards.reduce((sum, card) => sum + (card.analysis?.eventValue || 0), 0);
+            const annualFee = cards.reduce((sum, card) => sum + (card.analysis?.effectiveAnnualFee || 0), 0);
+            const netMonthlyBenefit = monthlyDiscount + eventMonthlyValue - annualFeeMonthly;
+            const firstYearNetBenefit = (monthlyDiscount * 12) + eventValue - annualFee;
+
+            return {
+                cards,
+                bestAreas: [...bestByArea.values()].sort((a, b) => b.benefit - a.benefit),
+                monthlyDiscount,
+                eventMonthlyValue,
+                annualFeeMonthly,
+                netMonthlyBenefit,
+                firstYearNetBenefit,
+                effectiveRate: totalSpending > 0 ? netMonthlyBenefit / totalSpending : 0
+            };
+        }
+
+        function renderComboScenarioCard(combo, index, label) {
+            const areaText = combo.bestAreas.slice(0, 5).map(item => `${item.area}: ${item.cardName} ${formatWon(item.benefit)}`).join(' · ') || '적용 없음';
+            const discountDetails = combo.cards.flatMap(card => (card.analysis?.categoryDetails || [])
+                .filter(detail => (Number(detail.benefit) || 0) > 0)
+                .map(detail => ({
+                    cardName: card.name,
+                    label: detail.category,
+                    expense: detail.expense || detail.discountedSpend || 0,
+                    benefit: detail.benefit
+                })))
+                .sort((a, b) => b.benefit - a.benefit)
+                .slice(0, 10);
+            return `
+                <div class="card-item ${index === 0 ? 'top' : ''}">
+                    <div class="card-rank">${index + 1}</div>
+                    <div class="pack-tag">${label || `${combo.cards.length}장 조합`}</div>
+                    <div class="card-name">${combo.cards.map(card => card.name).join(' + ')}</div>
+                    <div class="card-company">${combo.cards.map(card => card.company).join(' · ')}</div>
+                    <div class="card-stat">
+                        <span class="stat-label">조합 월 순혜택</span>
+                        <span class="stat-value ${combo.netMonthlyBenefit >= 0 ? 'benefit' : 'danger'}">${formatSignedWon(combo.netMonthlyBenefit)}</span>
+                    </div>
+                    <div class="card-stat">
+                        <span class="stat-label">조합 실질 할인율</span>
+                        <span class="stat-value ${combo.effectiveRate >= 0.03 ? 'benefit' : ''}">${formatRate(combo.effectiveRate)}</span>
+                    </div>
+                    <div class="card-stat">
+                        <span class="stat-label">첫해 조합 순혜택</span>
+                        <span class="stat-value ${combo.firstYearNetBenefit >= 0 ? 'benefit' : 'danger'}">${formatSignedWon(combo.firstYearNetBenefit)}</span>
+                    </div>
+                    <div class="breakdown">
+                        <div class="breakdown-title">배분 기준</div>
+                        <div class="breakdown-row"><span>월 할인 합계</span><strong>${formatWon(combo.monthlyDiscount)}</strong></div>
+                        <div class="breakdown-row"><span>가입혜택 월 환산</span><strong>${formatWon(combo.eventMonthlyValue)}</strong></div>
+                        <div class="breakdown-row"><span>연회비 월 차감</span><strong>-${formatWon(combo.annualFeeMonthly)}</strong></div>
+                        <span class="source-note">${areaText}</span>
+                        <div class="discount-detail-stack">
+                            ${discountDetails.length ? discountDetails.map(item => `
+                                <div class="discount-detail-row">
+                                    <span>${escapeHtml(item.cardName)} · ${escapeHtml(item.label)}<br>대상 ${formatWon(item.expense)}</span>
+                                    <strong>${formatWon(item.benefit)}</strong>
+                                </div>
+                            `).join('') : '<span class="source-note">적용 가능한 항목별 할인 내역이 없습니다.</span>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderScenarioCardPicker(results = lastAnalysisResults || []) {
+            const picker = document.getElementById('scenarioCardPicker');
+            const summary = document.getElementById('scenarioPickerSummary');
+            if (!picker || !summary) return;
+            const ranked = getScenarioCardPool(results)
+                .sort((a, b) => (b.analysis?.firstYearNetBenefit || 0) - (a.analysis?.firstYearNetBenefit || 0))
+                .slice(0, 22);
+            const selectedCards = getScenarioSelectedCards(results);
+            summary.textContent = selectedCards.length
+                ? `선택 카드 ${selectedCards.length}장: ${selectedCards.map(card => card.name).join(' + ')}`
+                : '카드를 최대 3장까지 선택하면 선택 조합의 예상 혜택을 먼저 보여줍니다.';
+
+            picker.innerHTML = ranked.map(card => {
+                const id = getScenarioCardId(card);
+                const selected = selectedScenarioCardIds.includes(id);
+                const analysis = card.analysis || {};
+                return `
+                    <button type="button" class="benefit-filter-card ${selected ? 'active' : ''}" onclick="toggleScenarioCard('${id}')">
+                        <span>
+                            <strong>${escapeHtml(card.name)}</strong>
+                            <span class="benefit-filter-detail">${card.isOwnedCard ? '보유카드 · ' : ''}${escapeHtml(card.company)} · 월 ${formatSignedWon(analysis.netMonthlyBenefit || 0)} · 첫해 ${formatSignedWon(analysis.firstYearNetBenefit || 0)}</span>
+                        </span>
+                        <span class="benefit-filter-icon">${selected ? '✓' : '+'}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function toggleScenarioCard(cardId) {
+            if (selectedScenarioCardIds.includes(cardId)) {
+                selectedScenarioCardIds = selectedScenarioCardIds.filter(id => id !== cardId);
+            } else {
+                if (selectedScenarioCardIds.length >= 3) {
+                    showMessage('선택 조합은 최대 3장까지 볼 수 있어요. 하나를 해제한 뒤 다시 선택해주세요.', 'warning');
+                    return;
+                }
+                selectedScenarioCardIds = [...selectedScenarioCardIds, cardId];
+            }
+            saveSyncReadySnapshot('scenario-card');
+            rerenderComboOptimizer();
+        }
+
+        function clearScenarioCardSelection() {
+            selectedScenarioCardIds = [];
+            saveSyncReadySnapshot('scenario-card-clear');
+            rerenderComboOptimizer();
+        }
+
         function rerenderComboOptimizer() {
             if (!lastAnalysisResults) {
                 showMessage('먼저 분석 시작을 눌러주세요.', 'warning');
@@ -6253,75 +7701,20 @@
             if (!comboResults || !emptyCombo) return;
 
             const comboSize = Math.min(Math.max(parseInt(document.getElementById('comboSize')?.value) || 2, 2), 4);
+            renderScenarioCardPicker(results);
             const combos = [];
             generateCardCombinations(results, comboSize).forEach(cards => {
-                    const bestByArea = new Map();
-
-                    cards.forEach(card => {
-                        card.analysis.categoryDetails.forEach(detail => {
-                            const key = detail.category;
-                            const current = bestByArea.get(key);
-                            if (!current || detail.benefit > current.benefit) {
-                                bestByArea.set(key, {
-                                    area: key,
-                                    benefit: detail.benefit,
-                                    cardName: card.name
-                                });
-                            }
-                        });
-                    });
-
-                    const monthlyDiscount = [...bestByArea.values()].reduce((sum, item) => sum + item.benefit, 0);
-                    const eventMonthlyValue = cards.reduce((sum, card) => sum + card.analysis.eventMonthlyValue, 0);
-                    const annualFeeMonthly = cards.reduce((sum, card) => sum + card.analysis.monthlyAnnualFee, 0);
-                    const netMonthlyBenefit = monthlyDiscount + eventMonthlyValue - annualFeeMonthly;
-                    const firstYearNetBenefit = (monthlyDiscount * 12) + cards.reduce((sum, card) => sum + card.analysis.eventValue, 0) - cards.reduce((sum, card) => sum + card.analysis.effectiveAnnualFee, 0);
-
-                    combos.push({
-                        cards,
-                        bestAreas: [...bestByArea.values()].sort((a, b) => b.benefit - a.benefit),
-                        monthlyDiscount,
-                        eventMonthlyValue,
-                        annualFeeMonthly,
-                        netMonthlyBenefit,
-                        firstYearNetBenefit,
-                        effectiveRate: totalSpending > 0 ? netMonthlyBenefit / totalSpending : 0
-                    });
+                    combos.push(calculateComboScenario(cards, totalSpending));
             });
 
             const topCombos = combos.sort((a, b) => b.firstYearNetBenefit - a.firstYearNetBenefit).slice(0, 6);
-            lastBestCombo = topCombos[0] || null;
-            comboResults.innerHTML = topCombos.map((combo, index) => {
-                const areaText = combo.bestAreas.slice(0, 5).map(item => `${item.area}: ${item.cardName} ${formatWon(item.benefit)}`).join(' · ') || '적용 없음';
-                return `
-                    <div class="card-item ${index === 0 ? 'top' : ''}">
-                        <div class="card-rank">${index + 1}</div>
-                        <div class="pack-tag">${comboSize}장 조합</div>
-                        <div class="card-name">${combo.cards.map(card => card.name).join(' + ')}</div>
-                        <div class="card-company">${combo.cards.map(card => card.company).join(' · ')}</div>
-                        <div class="card-stat">
-                            <span class="stat-label">조합 월 순혜택</span>
-                            <span class="stat-value ${combo.netMonthlyBenefit >= 0 ? 'benefit' : 'danger'}">${formatSignedWon(combo.netMonthlyBenefit)}</span>
-                        </div>
-                        <div class="card-stat">
-                            <span class="stat-label">조합 실질 할인율</span>
-                            <span class="stat-value ${combo.effectiveRate >= 0.03 ? 'benefit' : ''}">${formatRate(combo.effectiveRate)}</span>
-                        </div>
-                        <div class="card-stat">
-                            <span class="stat-label">첫해 조합 순혜택</span>
-                            <span class="stat-value ${combo.firstYearNetBenefit >= 0 ? 'benefit' : 'danger'}">${formatSignedWon(combo.firstYearNetBenefit)}</span>
-                        </div>
-                        <div class="breakdown">
-                            <div class="breakdown-title">배분 기준</div>
-                            <div class="breakdown-row"><span>월 할인 합계</span><strong>${formatWon(combo.monthlyDiscount)}</strong></div>
-                            <div class="breakdown-row"><span>가입혜택 월 환산</span><strong>${formatWon(combo.eventMonthlyValue)}</strong></div>
-                            <div class="breakdown-row"><span>연회비 월 차감</span><strong>-${formatWon(combo.annualFeeMonthly)}</strong></div>
-                            <span class="source-note">${areaText}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            emptyCombo.style.display = topCombos.length ? 'none' : 'block';
+            const selectedCards = getScenarioSelectedCards(results);
+            const selectedCombo = selectedCards.length ? calculateComboScenario(selectedCards, totalSpending) : null;
+            lastBestCombo = selectedCombo || topCombos[0] || null;
+            const selectedHtml = selectedCombo ? renderComboScenarioCard(selectedCombo, 0, `선택 조합 · ${selectedCards.length}장`) : '';
+            const autoHtml = topCombos.map((combo, index) => renderComboScenarioCard(combo, selectedCombo ? index + 1 : index, `${comboSize}장 자동 추천`)).join('');
+            comboResults.innerHTML = selectedHtml + autoHtml;
+            emptyCombo.style.display = (selectedCombo || topCombos.length) ? 'none' : 'block';
             return lastBestCombo;
         }
 
@@ -6624,8 +8017,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
