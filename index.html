@@ -102,29 +102,116 @@
 
         .tabs {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             margin-top: 20px;
-            border-bottom: 2px solid var(--border);
+            border: 1px solid var(--border);
+            background: var(--surface-soft);
+            padding: 4px;
+            border-radius: 999px;
             overflow-x: auto;
             scrollbar-width: thin;
         }
 
         .tab {
-            padding: 12px 20px;
+            flex: 1;
+            min-width: 78px;
+            padding: 10px 16px;
             border: none;
             background: none;
             cursor: pointer;
             font-weight: 600;
             color: var(--muted);
-            border-bottom: 3px solid transparent;
             transition: all 0.2s;
-            border-radius: 6px 6px 0 0;
+            border-radius: 999px;
             white-space: nowrap;
         }
 
         .tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
+            color: var(--dark);
+            background: var(--surface);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+        }
+
+        .more-nav {
+            margin-top: 12px;
+        }
+
+        .more-nav summary {
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+            list-style: none;
+        }
+
+        .more-nav summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .more-nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .more-nav-grid button {
+            padding: 9px 10px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--dark);
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .quick-dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .quick-card {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+            padding: 18px;
+        }
+
+        .quick-card.primary {
+            border-color: rgba(99, 102, 241, 0.35);
+            background: #F8F8FF;
+        }
+
+        .quick-card span,
+        .quick-card small {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .quick-card strong {
+            display: block;
+            margin: 8px 0 4px;
+            color: var(--dark);
+            font-size: 24px;
+            line-height: 1.2;
+            word-break: keep-all;
+        }
+
+        .section-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .section-head p {
+            color: var(--muted);
+            margin-top: 6px;
+            line-height: 1.5;
         }
 
         .tab-content {
@@ -1076,8 +1163,17 @@
             .input-section,
             .final-grid,
             .import-grid,
-            .custom-merchant-form {
+            .custom-merchant-form,
+            .quick-dashboard {
                 grid-template-columns: 1fr;
+            }
+
+            .section-head {
+                flex-direction: column;
+            }
+
+            .section-head .btn-primary {
+                width: 100%;
             }
 
             .category-grid {
@@ -1127,12 +1223,12 @@
             }
 
             .tabs {
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
             }
 
             .tab {
                 font-size: 13px;
-                padding: 10px 15px;
+                padding: 10px 12px;
             }
 
             .export-actions .btn-primary,
@@ -1240,6 +1336,7 @@
             border-radius: 10px;
             background: var(--surface);
             overflow: hidden;
+            min-width: 0;
         }
 
         .usage-workflow-header {
@@ -1261,12 +1358,14 @@
             padding: 16px 18px 18px;
             display: grid;
             gap: 16px;
+            min-width: 0;
         }
 
         .workflow-grid {
             display: grid;
             grid-template-columns: minmax(320px, 1.2fr) minmax(260px, 0.8fr);
             gap: 16px;
+            min-width: 0;
         }
 
         .workflow-panel {
@@ -1274,6 +1373,7 @@
             border-radius: 8px;
             background: var(--surface);
             padding: 14px;
+            min-width: 0;
         }
 
         .workflow-panel h4 {
@@ -1285,6 +1385,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 10px;
+            min-width: 0;
         }
 
         .forecast-kpi {
@@ -1292,6 +1393,7 @@
             border-radius: 8px;
             padding: 12px;
             background: var(--surface-soft);
+            min-width: 0;
         }
 
         .forecast-kpi span {
@@ -1310,6 +1412,7 @@
         .new-card-results {
             display: grid;
             gap: 8px;
+            min-width: 0;
         }
 
         .forecast-category-row,
@@ -1321,6 +1424,7 @@
             border-bottom: 1px solid #F3F4F6;
             padding: 7px 0;
             font-size: 13px;
+            min-width: 0;
         }
 
         .new-card-row {
@@ -1728,13 +1832,13 @@
 
         @media (max-width: 900px) {
             .workflow-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr);
             }
 
             .calendar-toolbar,
             .calendar-layout,
             .usage-visual-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr);
             }
 
             .calendar-day {
@@ -1791,8 +1895,28 @@
 
             .calendar-summary-grid,
             .forecast-kpis {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-columns: minmax(0, 1fr);
                 gap: 8px;
+            }
+
+            .usage-workflow-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .usage-workflow-body {
+                padding: 12px;
+            }
+
+            .forecast-category-row,
+            .new-card-row {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 4px;
+            }
+
+            .forecast-category-row strong,
+            .new-card-row strong {
+                justify-self: start;
             }
 
             .calendar-kpi,
@@ -1886,33 +2010,61 @@
 <body>
     <div class="container">
         <header>
-            <h1>💳 Card Benefit Optimizer</h1>
-            <p class="subtitle">Compare real discounts, signup rewards, annual fees, and net card benefits from your monthly spending.</p>
-            <div class="event-link-strip" aria-label="카드 이벤트 외부 링크">
-                <span>이벤트 확인</span>
-                <a class="event-link" href="https://www.card-gorilla.com/event" target="_blank" rel="noopener noreferrer">CardGorilla 이벤트</a>
-                <a class="event-link" href="https://www.banksalad.com/chart/cards?tab=event" target="_blank" rel="noopener noreferrer">Banksalad 이벤트</a>
-            </div>
+            <h1>내 카드 혜택</h1>
+            <p class="subtitle">지출을 넣으면 지금 받을 혜택, 바꿀 결제처, 카드 조합을 바로 정리합니다.</p>
 
             <div class="tabs">
-                <button class="tab active" onclick="switchTab(0)">📊 지출 입력</button>
-                <button class="tab" onclick="switchTab(1)">📈 분석 결과</button>
-                <button class="tab" onclick="switchTab(2)">💳 기존 카드</button>
-                <button class="tab" onclick="switchTab(3)">💡 혜택 비교</button>
-                <button class="tab" onclick="switchTab(4)">✅ 할인·실적 체크</button>
-                <button class="tab" onclick="switchTab(5)">⚠️ 함정 체크</button>
-                <button class="tab" onclick="switchTab(6)">🔗 조합 최적화</button>
-                <button class="tab" onclick="switchTab(7)">✅ 최종 정리</button>
-                <button class="tab" onclick="switchTab(8)">🎁 이벤트 카드</button>
-                <button class="tab" onclick="switchTab(9)">🗓️ 사용 달력</button>
-                <button class="tab" onclick="switchTab(10)">📝 노션 보기</button>
+                <button class="tab active" data-tab-target="0" onclick="switchTab(0)">입력</button>
+                <button class="tab" data-tab-target="1" onclick="switchTab(1)">추천</button>
+                <button class="tab" data-tab-target="3" onclick="switchTab(3)">상세</button>
+                <button class="tab" data-tab-target="10" onclick="switchTab(10)">내보내기</button>
             </div>
+            <details class="more-nav">
+                <summary>상세 기능</summary>
+                <div class="more-nav-grid">
+                    <button type="button" onclick="switchTab(2)">기존 카드</button>
+                    <button type="button" onclick="switchTab(4)">할인·실적</button>
+                    <button type="button" onclick="switchTab(5)">함정 체크</button>
+                    <button type="button" onclick="switchTab(6)">조합 최적화</button>
+                    <button type="button" onclick="switchTab(7)">최종 정리</button>
+                    <button type="button" onclick="switchTab(8)">이벤트 카드</button>
+                    <button type="button" onclick="switchTab(9)">사용 달력</button>
+                </div>
+                <div class="event-link-strip" aria-label="카드 이벤트 외부 링크">
+                    <span>이벤트 확인</span>
+                    <a class="event-link" href="https://www.card-gorilla.com/event" target="_blank" rel="noopener noreferrer">CardGorilla</a>
+                    <a class="event-link" href="https://www.banksalad.com/chart/cards?tab=event" target="_blank" rel="noopener noreferrer">Banksalad</a>
+                </div>
+            </details>
         </header>
 
         <!-- TAB 1: 지출 입력 -->
         <div class="tab-content active">
-            <h2>당신의 월 지출을 입력하세요</h2>
-            <p style="color: #6B7280; margin-bottom: 20px;">정확한 분석을 위해 각 카테고리의 월 평균 지출액을 입력해주세요. 내용이 저장됩니다.</p>
+            <div class="quick-dashboard">
+                <div class="quick-card">
+                    <span>이번 달 지출</span>
+                    <strong id="quickTotalSpending">0원</strong>
+                    <small id="quickPaymentSplit">💳 0원 · 💵 0원</small>
+                </div>
+                <div class="quick-card primary">
+                    <span>추천 카드</span>
+                    <strong id="quickTopCard">분석 전</strong>
+                    <small id="quickTopBenefit">지출을 넣고 분석하세요</small>
+                </div>
+                <div class="quick-card">
+                    <span>바꿀 결제처</span>
+                    <strong id="quickSwitchCount">0개</strong>
+                    <small id="quickSwitchHint">분석 후 표시됩니다</small>
+                </div>
+            </div>
+
+            <div class="section-head">
+                <div>
+                    <h2>지출 입력</h2>
+                    <p>엑셀, Google Sheets, 사진 또는 직접 입력으로 월 지출을 정리합니다.</p>
+                </div>
+                <button class="btn-primary" onclick="analyzeCards()">분석 시작</button>
+            </div>
 
             <div class="import-panel">
                 <div class="category-builder-header" style="padding: 0; border: none; background: transparent; margin-bottom: 14px;">
@@ -5781,6 +5933,7 @@
             applyImportedTotals(rows);
             clearImportReview();
             setImportStatus(`${rows.length}건을 확인 후 반영했습니다. 수정한 분류는 다음 자동분류에 학습됩니다.`);
+            updateQuickDashboard();
             if (lastAnalysisResults) analyzeCards();
         }
 
@@ -6749,6 +6902,7 @@
             refreshMerchantSwitchIndicators(bestCombo);
             updateOwnedCardList(results, bestCombo);
             updateFinalSummary(results, bestCombo, totalSpending, cardSpending, paymentBreakdown);
+            updateQuickDashboard();
 
             // 함정 체크리스트 업데이트
             updateTrapChecklist(results[0]);
@@ -8084,6 +8238,33 @@
             emptyFinal.style.display = 'none';
         }
 
+        function updateQuickDashboard() {
+            const paymentBreakdown = getPaymentBreakdown();
+            const totalSpending = Object.values(paymentBreakdown.raw).reduce((sum, amount) => sum + amount, 0);
+            const cardSpending = Object.values(paymentBreakdown.card).reduce((sum, amount) => sum + amount, 0);
+            const cashSpending = totalSpending - cardSpending;
+            const topCard = lastAnalysisResults?.[0];
+            const switches = lastBestCombo ? collectMerchantSwitches(lastBestCombo) : [];
+
+            const totalEl = document.getElementById('quickTotalSpending');
+            const splitEl = document.getElementById('quickPaymentSplit');
+            const cardEl = document.getElementById('quickTopCard');
+            const benefitEl = document.getElementById('quickTopBenefit');
+            const switchCountEl = document.getElementById('quickSwitchCount');
+            const switchHintEl = document.getElementById('quickSwitchHint');
+
+            if (totalEl) totalEl.textContent = formatWon(totalSpending);
+            if (splitEl) splitEl.textContent = `💳 ${formatWon(cardSpending)} · 💵 ${formatWon(cashSpending)}`;
+            if (cardEl) cardEl.textContent = topCard ? topCard.name : '분석 전';
+            if (benefitEl) benefitEl.textContent = topCard ? `월 순혜택 ${formatSignedWon(topCard.analysis.netMonthlyBenefit)}` : '지출을 넣고 분석하세요';
+            if (switchCountEl) switchCountEl.textContent = `${switches.length}개`;
+            if (switchHintEl) {
+                switchHintEl.textContent = switches.length
+                    ? `${switches[0].label}부터 바꾸면 좋아요`
+                    : (topCard ? '현재 선택과 추천이 거의 맞습니다' : '분석 후 표시됩니다');
+            }
+        }
+
         // 차트 업데이트
         function updateCharts() {
             const eventCards = cardEvents.filter(card => card.approvalCount > 0);
@@ -8227,8 +8408,9 @@
 
         // 탭 전환
         function switchTab(index) {
-            document.querySelectorAll('.tab').forEach((tab, i) => {
-                tab.classList.toggle('active', i === index);
+            const primaryTarget = index === 0 || index === 1 || index === 10 ? index : 3;
+            document.querySelectorAll('.tab').forEach((tab) => {
+                tab.classList.toggle('active', Number(tab.dataset.tabTarget) === primaryTarget);
             });
             document.querySelectorAll('.tab-content').forEach((content, i) => {
                 content.classList.toggle('active', i === index);
@@ -8269,6 +8451,7 @@
             updateDiscountPerformanceCards();
             updateTrapChecklist(cardEvents[0]);
             loadDriveCsvUrl();
+            updateQuickDashboard();
             refreshNotionPreview();
         });
     </script>
