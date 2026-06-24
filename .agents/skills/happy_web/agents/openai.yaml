@@ -1,0 +1,6 @@
+interface:
+  display_name: "Happy Web"
+  short_description: "Repo-specific patterns and workflows for happy_web"
+  default_prompt: "Use the happy_web repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true
